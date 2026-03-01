@@ -44,6 +44,24 @@ Use this reference during implementation and review to prevent common JS/TS bugs
 - Risk: type safety collapse and hidden defects.
 - Fix: prefer `unknown`, narrow early, and model domain types explicitly.
 
+## Advanced Type-System Pitfalls
+
+1. Pitfall: unconstrained generics (`<T>(value: T) => ...`) on reusable APIs.
+- Risk: inferred types become too broad; misuse is accepted silently.
+- Fix: add meaningful constraints/defaults (`<T extends Record<string, unknown>>`) and key-based bounds (`K extends keyof T`).
+
+2. Pitfall: deeply recursive conditional/mapped utility types.
+- Risk: type-check slowdowns, hard-to-read errors, and IDE instability.
+- Fix: bound recursion, split helpers into named aliases, and simplify public surface types.
+
+3. Pitfall: distributive conditional types when distribution is not intended.
+- Risk: unions are transformed unexpectedly.
+- Fix: disable distribution with tuple wrapping (`[T] extends [U] ? X : Y`) when appropriate.
+
+4. Pitfall: type-assertion driven APIs (`as Foo`) instead of runtime-safe narrowing.
+- Risk: compile-time confidence without runtime guarantees.
+- Fix: implement type guards/assertion functions at parsing and IO boundaries.
+
 ## Numeric and Date Pitfalls
 
 1. Pitfall: direct equality checks on floating-point math.
@@ -74,4 +92,5 @@ Use this reference during implementation and review to prevent common JS/TS bugs
 - Are defaults using `??` rather than `||` when falsy values are valid?
 - Are shared inputs protected from mutation?
 - Are runtime boundaries validated before type narrowing?
+- Are advanced utility types bounded, readable, and compile-time tested?
 - Are hot-path optimizations measured and documented?

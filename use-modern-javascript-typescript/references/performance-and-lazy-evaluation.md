@@ -11,7 +11,17 @@ Use this reference when performance is relevant or when choosing between eager a
 
 Do not introduce complexity without evidence.
 
-## 2) Lazy Evaluation Patterns
+## 2) Type-System Performance
+
+Treat compiler throughput as part of performance for TS-heavy codebases.
+
+- Run diagnostics (`tsc --extendedDiagnostics`) when type-heavy changes significantly affect check time.
+- Prefer reusable helper aliases over deeply nested inline conditional types.
+- Keep recursive type utilities bounded; do not model unbounded recursion in public types.
+- Control unwanted distributive behavior with tuple wrapping (`[T] extends [U]`) when needed.
+- Split complex utility types into small named parts to improve maintainability and error readability.
+
+## 3) Lazy Evaluation Patterns
 
 ### Generator Pipelines
 
@@ -52,7 +62,7 @@ export async function runHeavyReport(input: ReportInput): Promise<Report> {
 }
 ```
 
-## 3) Concurrency Choices
+## 4) Concurrency Choices
 
 - Use `Promise.all` for independent tasks where one failure should fail the group.
 - Use `Promise.allSettled` for best-effort fan-out.
@@ -60,22 +70,23 @@ export async function runHeavyReport(input: ReportInput): Promise<Report> {
 
 Ordered and dependent side effects should stay sequential.
 
-## 4) Memory and Allocation Hygiene
+## 5) Memory and Allocation Hygiene
 
 - Prefer streaming/iterables for large datasets.
 - Avoid repeated object spreading in deep loops when it causes excessive allocations.
 - Reuse stable instances for expensive regex/parsers where safe.
 - Use `toSorted` / `toReversed` when mutation would cause defensive cloning later anyway.
 
-## 5) Common High-Value Improvements
+## 6) Common High-Value Improvements
 
 - Exit early on invalid inputs.
 - Hoist invariant work outside loops.
 - Cache normalized keys for repeated lookups.
 - Replace O(n^2) scans with `Map`/`Set` indexing where appropriate.
 
-## 6) Performance Guardrails
+## 7) Performance Guardrails
 
 - Keep readable code unless measured impact requires lower-level optimization.
 - Capture benchmark input distributions close to production behavior.
 - Document tradeoffs when introducing caches, throttling, debouncing, or batching.
+- Document tradeoffs when introducing advanced type-level utilities that increase type-check cost.

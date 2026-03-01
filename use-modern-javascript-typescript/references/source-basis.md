@@ -15,6 +15,7 @@ Authoritative language and runtime references:
 - https://www.typescriptlang.org/tsconfig/
 - https://www.typescriptlang.org/tsconfig/strict.html
 - https://www.typescriptlang.org/tsconfig/erasableSyntaxOnly.html
+- https://github.com/microsoft/TypeScript/wiki/Performance
 - https://nodejs.org/docs/latest/api/typescript.html
 - https://developer.mozilla.org/en-US/docs/Web/JavaScript
 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode
@@ -41,3 +42,4 @@ Referenced by upstream skill resource sections:
 
 - Upstream source skills did not include separate `references/` folders; their SKILL content and linked resources were used as reference basis.
 - This skill applies TypeScript-first guidance while remaining usable for JavaScript-only codebases.
+- Guidance from `typescript-advanced-types` is encoded as practical rules for constrained generics, conditional/mapped/template literal types, `infer`, runtime-safe narrowing, compile-time type tests, and type-check performance guardrails.

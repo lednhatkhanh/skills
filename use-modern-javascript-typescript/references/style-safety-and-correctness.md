@@ -1,6 +1,21 @@
 # Style, Safety, and Correctness
 
-Use this reference when implementing or reviewing code structure, typing, nullability, and error semantics.
+Use this reference when implementing or reviewing code structure, typing strategy, nullability, and runtime/error semantics.
+
+## Table of Contents
+
+- 1) Language Baseline
+- 2) Function-First Design
+- 3) Type Modeling (`type` vs `interface`)
+- 4) Advanced Type Patterns
+- 5) Narrowing and Assertion Boundaries
+- 6) Erasable TypeScript Only
+- 7) Nullability and Defaults
+- 8) Errors and Result Semantics
+- 9) Immutability and Shared State
+- 10) Async Control Flow
+- 11) Type-Level Validation
+- 12) Consistency Checklist
 
 ## 1) Language Baseline
 
@@ -26,14 +41,12 @@ Recommended `tsconfig` baseline:
 }
 ```
 
-If `erasableSyntaxOnly` is unavailable in the installed TS version, keep the same rule manually during review.
+If `erasableSyntaxOnly` is unavailable in the installed TS version, enforce the same rule manually during review.
 
 ## 2) Function-First Design
 
-Rules:
-
 - Use function declarations for named logic.
-- Use inline arrow callbacks only when passed directly to APIs (`map`, `filter`, event handlers, etc.).
+- Use inline arrow callbacks only when passed directly to APIs (`map`, `filter`, event handlers).
 - Prefer pure functions and explicit inputs/outputs.
 - Keep functions small and behavior-focused.
 
@@ -53,21 +66,86 @@ export const normalizeEmail = function (email: string): string {
 };
 ```
 
-## 3) Prefer `type` Over `interface`
+## 3) Type Modeling (`type` vs `interface`)
 
-Prefer `type` for object shapes, unions, mapped/conditional types, and aliases:
+- Prefer `type` for unions, mapped/conditional/template-literal transforms, and alias composition.
+- Use `interface` for extendable object contracts and declaration-merging use cases.
+- Keep public API shapes readable before adding type-level abstractions.
+
+Prefer:
 
 ```ts
+export type UserStatus = "active" | "disabled";
+
 export type User = {
   id: string;
   email: string;
-  role: "admin" | "member";
+  status: UserStatus;
 };
 ```
 
-Use `interface` only when its specific behavior is needed (for example declaration merging in external type augmentation).
+## 4) Advanced Type Patterns
 
-## 4) Erasable TypeScript Only
+Use advanced types for API clarity, not novelty.
+
+### Constrained and Defaulted Generics
+
+```ts
+export function pick<TObj extends object, TKey extends keyof TObj>(
+  obj: TObj,
+  key: TKey,
+): TObj[TKey] {
+  return obj[key];
+}
+
+export type Result<TData, TError = Error> =
+  | { ok: true; data: TData }
+  | { ok: false; error: TError };
+```
+
+### Conditional Types and `infer`
+
+```ts
+export type AsyncValue<T> = T extends Promise<infer U> ? U : T;
+```
+
+### Mapped and Template Literal Types
+
+```ts
+export type PrefixedKeys<
+  T extends Record<string, unknown>,
+  TPrefix extends string,
+> = {
+  [K in keyof T as `${TPrefix}${Capitalize<string & K>}`]: T[K];
+};
+```
+
+## 5) Narrowing and Assertion Boundaries
+
+- Narrow `unknown` at runtime boundaries.
+- Prefer type guards and assertion functions over broad assertions.
+- Keep assertions small and close to parsing/IO boundaries.
+
+Prefer:
+
+```ts
+export function isUser(value: unknown): value is User {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    "email" in value
+  );
+}
+
+export function assertUser(value: unknown): asserts value is User {
+  if (!isUser(value)) {
+    throw new Error("Expected User payload");
+  }
+}
+```
+
+## 6) Erasable TypeScript Only
 
 Disallow constructs that require non-trivial runtime transforms:
 
@@ -83,9 +161,9 @@ Prefer erasable alternatives:
 - plain modules instead of namespaces
 - explicit field declarations and assignment in function bodies
 - `import` / `export` ESM syntax
-- `value as Foo` assertions and, when possible, type guards
+- narrowing and assertion functions over broad casts
 
-## 5) Nullability and Defaults
+## 7) Nullability and Defaults
 
 - Use optional chaining for deep access.
 - Use nullish coalescing for defaults where `0`, `false`, and `""` are valid values.
@@ -103,28 +181,43 @@ Avoid:
 const timeoutMs = config.request && config.request.timeoutMs || 5000;
 ```
 
-## 6) Errors and Result Semantics
+## 8) Errors and Result Semantics
 
 - Throw typed `Error` objects with actionable messages.
 - Include cause chains for wrapped errors when available.
 - Never swallow errors silently.
 - Handle promise rejections at every boundary.
 - Use discriminated unions for recoverable domain outcomes.
+- Enforce exhaustive `switch` handling with `never` checks.
 
-## 7) Immutability and Shared State
+## 9) Immutability and Shared State
 
 - Treat inputs as immutable unless explicitly documented otherwise.
 - Prefer non-mutating collection operations (`map`, `filter`, `reduce`, `toSorted`).
 - Avoid shared mutable module-level state unless unavoidable and synchronized.
 
-## 8) Async Control Flow
+## 10) Async Control Flow
 
 - Use `for...of` with `await` for ordered side effects.
 - Use `Promise.all` only when operations are independent and fail-fast behavior is desired.
 - Use `Promise.allSettled` when partial success is acceptable.
 - Do not use `forEach(async ...)` for sequencing or completion tracking.
 
-## 9) Consistency Checklist
+## 11) Type-Level Validation
+
+- Add compile-time tests for non-trivial utility types and generic contracts.
+- Cover both valid inference and invalid calls.
+
+Example:
+
+```ts
+const status: UserStatus = "active";
+
+// @ts-expect-error invalid status should fail
+const invalidStatus: UserStatus = "archived";
+```
+
+## 12) Consistency Checklist
 
 - Names: stable domain terms, no ambiguous abbreviations.
 - Types: explicit at public boundaries; inference inside small local scopes.
