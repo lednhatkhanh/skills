@@ -7,11 +7,12 @@ This repo is a workspace for your personal AI skills.
 - Skill folders at the repository root (current example: `use-modern-go/`)
 - Per-skill `SKILL.md` files for concise operational instructions
 - Optional per-skill `references/` and `agents/` folders for deeper guidance and metadata
-- `docs/` for shared or skill-specific prompt assets (current example: `docs/go-skill-prompt.md`)
+- `docs/` for shared or skill-specific prompt assets (current examples: `docs/go-skill-prompt.md`, `docs/javascript-typescript-skill-prompt.md`)
 
 ## Current Skills
 
 - `use-modern-go`: modern Go design, style, testing, concurrency, and version-aware guidance
+- `use-modern-javascript-typescript`: strict, modern JS/TS guidance with function-first design, erasable TS syntax, safety/performance defaults, and pitfall prevention
 
 ## Quick Update Flow (Any Skill)
 

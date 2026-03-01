@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Modern JavaScript + TypeScript"
+  short_description: "Write strict, safe, modern JS/TS with erasable syntax"
+  default_prompt: "Apply modern JavaScript and TypeScript best practices with strict mode, erasable TypeScript syntax, function-first design, and safety/performance guardrails."
