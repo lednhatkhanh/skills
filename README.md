@@ -11,8 +11,10 @@ This repo is a workspace for your personal AI skills.
 
 ## Current Skills
 
-- `use-modern-go`: modern Go design, style, testing, concurrency, and version-aware guidance
-- `use-modern-javascript-typescript`: strict, modern JS/TS guidance with function-first design, erasable TS syntax, safety/performance defaults, and pitfall prevention
+| Skill | Focus | Canonical Prompt |
+| --- | --- | --- |
+| `use-modern-go` | modern Go design, style, testing, concurrency, and version-aware guidance | `docs/go-skill-prompt.md` |
+| `use-modern-javascript-typescript` | strict, modern JS/TS guidance with function-first design, erasable TS syntax, immutable defaults, and pitfall prevention | `docs/javascript-typescript-skill-prompt.md` |
 
 ## Quick Update Flow (Any Skill)
 
@@ -63,6 +65,9 @@ Naming convention:
 
 - Use lowercase letters, digits, and hyphens only (example: `api-design-review`).
 
-## Go Skill Canonical Prompt
+## Canonical Prompt Index
 
-For `use-modern-go` updates, use the rewritten prompt in `docs/go-skill-prompt.md`.
+| Skill | Canonical prompt to use when updating |
+| --- | --- |
+| `use-modern-go` | `docs/go-skill-prompt.md` |
+| `use-modern-javascript-typescript` | `docs/javascript-typescript-skill-prompt.md` |

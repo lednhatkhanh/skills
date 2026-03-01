@@ -15,7 +15,7 @@ Use this workflow when the user asks to:
 
 This repository is for multiple personal skills, not only Go.
 
-- Each skill should live in its own top-level folder (example: `use-modern-go/`).
+- Each skill should live in its own top-level folder (examples: `use-modern-go/`, `use-modern-javascript-typescript/`).
 - Each skill should keep concise top-level instructions in `SKILL.md`.
 - Detailed guidance should live in skill-local `references/` files when needed.
 - Metadata should live in skill-local `agents/` files when needed.
@@ -61,21 +61,24 @@ Naming rules:
 - Use lowercase letters, digits, and hyphens only.
 - Keep names short and action-oriented.
 
-## Go-Specific Canonical Prompt (use-modern-go)
+## Canonical Prompt Index
 
-When updating `use-modern-go`, treat [docs/go-skill-prompt.md](docs/go-skill-prompt.md) as the canonical source.
+| Skill | Canonical prompt | Skill files to load |
+| --- | --- | --- |
+| `use-modern-go` | [docs/go-skill-prompt.md](docs/go-skill-prompt.md) | [use-modern-go/SKILL.md](use-modern-go/SKILL.md), [use-modern-go/references/go-style-and-design.md](use-modern-go/references/go-style-and-design.md), [use-modern-go/references/go-testing-and-concurrency.md](use-modern-go/references/go-testing-and-concurrency.md), [use-modern-go/references/modern-go-features.md](use-modern-go/references/modern-go-features.md), [use-modern-go/references/source-basis.md](use-modern-go/references/source-basis.md), [use-modern-go/agents/openai.yaml](use-modern-go/agents/openai.yaml) |
+| `use-modern-javascript-typescript` | [docs/javascript-typescript-skill-prompt.md](docs/javascript-typescript-skill-prompt.md) | [use-modern-javascript-typescript/SKILL.md](use-modern-javascript-typescript/SKILL.md), [use-modern-javascript-typescript/references/style-safety-and-correctness.md](use-modern-javascript-typescript/references/style-safety-and-correctness.md), [use-modern-javascript-typescript/references/performance-and-lazy-evaluation.md](use-modern-javascript-typescript/references/performance-and-lazy-evaluation.md), [use-modern-javascript-typescript/references/pitfalls-and-anti-patterns.md](use-modern-javascript-typescript/references/pitfalls-and-anti-patterns.md), [use-modern-javascript-typescript/references/source-basis.md](use-modern-javascript-typescript/references/source-basis.md), [use-modern-javascript-typescript/agents/openai.yaml](use-modern-javascript-typescript/agents/openai.yaml) |
 
-1. Read and reuse the `Rewritten Prompt` section from [docs/go-skill-prompt.md](docs/go-skill-prompt.md).
-2. Load:
-- [use-modern-go/SKILL.md](use-modern-go/SKILL.md)
-- [use-modern-go/references/go-style-and-design.md](use-modern-go/references/go-style-and-design.md)
-- [use-modern-go/references/go-testing-and-concurrency.md](use-modern-go/references/go-testing-and-concurrency.md)
-- [use-modern-go/references/modern-go-features.md](use-modern-go/references/modern-go-features.md)
-- [use-modern-go/references/source-basis.md](use-modern-go/references/source-basis.md)
-3. Keep `source-basis.md` aligned with source links in `docs/go-skill-prompt.md`.
-4. Update metadata only if needed:
-- [use-modern-go/agents/openai.yaml](use-modern-go/agents/openai.yaml)
-5. Confirm coverage includes design, errors, context, concurrency, testing, and version-aware modern Go.
+## Canonical Prompt Workflow
+
+When updating a skill listed in the canonical prompt index:
+
+1. Read and reuse the `Rewritten Prompt` section from that skill's canonical prompt file.
+2. Load the skill files listed in the table row.
+3. Keep that skill's `references/source-basis.md` aligned with links in its canonical prompt file.
+4. Update `agents/openai.yaml` only if needed and keep metadata consistent with `SKILL.md`.
+5. Confirm domain coverage stays current for the skill:
+- `use-modern-go`: design, errors, context, concurrency, testing, version-aware modern Go.
+- `use-modern-javascript-typescript`: strict mode, erasable TypeScript syntax, immutable operations, function-first design, optional chaining/nullish coalescing, common safety/performance pitfalls.
 
 ## Editing Rules
 
