@@ -67,6 +67,7 @@ Naming rules:
 | --- | --- | --- |
 | `use-modern-go` | [docs/go-skill-prompt.md](docs/go-skill-prompt.md) | [use-modern-go/SKILL.md](use-modern-go/SKILL.md), [use-modern-go/references/go-style-and-design.md](use-modern-go/references/go-style-and-design.md), [use-modern-go/references/go-testing-and-concurrency.md](use-modern-go/references/go-testing-and-concurrency.md), [use-modern-go/references/modern-go-features.md](use-modern-go/references/modern-go-features.md), [use-modern-go/references/source-basis.md](use-modern-go/references/source-basis.md), [use-modern-go/agents/openai.yaml](use-modern-go/agents/openai.yaml) |
 | `use-modern-javascript-typescript` | [docs/javascript-typescript-skill-prompt.md](docs/javascript-typescript-skill-prompt.md) | [use-modern-javascript-typescript/SKILL.md](use-modern-javascript-typescript/SKILL.md), [use-modern-javascript-typescript/references/style-safety-and-correctness.md](use-modern-javascript-typescript/references/style-safety-and-correctness.md), [use-modern-javascript-typescript/references/performance-and-lazy-evaluation.md](use-modern-javascript-typescript/references/performance-and-lazy-evaluation.md), [use-modern-javascript-typescript/references/pitfalls-and-anti-patterns.md](use-modern-javascript-typescript/references/pitfalls-and-anti-patterns.md), [use-modern-javascript-typescript/references/source-basis.md](use-modern-javascript-typescript/references/source-basis.md), [use-modern-javascript-typescript/agents/openai.yaml](use-modern-javascript-typescript/agents/openai.yaml) |
+| `use-nuqs` | [docs/nuqs-skill-prompt.md](docs/nuqs-skill-prompt.md) | [use-nuqs/SKILL.md](use-nuqs/SKILL.md), [use-nuqs/references/parser-and-setup.md](use-nuqs/references/parser-and-setup.md), [use-nuqs/references/state-and-server-integration.md](use-nuqs/references/state-and-server-integration.md), [use-nuqs/references/performance-navigation-and-limits.md](use-nuqs/references/performance-navigation-and-limits.md), [use-nuqs/references/debugging-testing-and-troubleshooting.md](use-nuqs/references/debugging-testing-and-troubleshooting.md), [use-nuqs/references/source-basis.md](use-nuqs/references/source-basis.md), [use-nuqs/agents/openai.yaml](use-nuqs/agents/openai.yaml) |
 
 ## Canonical Prompt Workflow
 
@@ -79,6 +80,7 @@ When updating a skill listed in the canonical prompt index:
 5. Confirm domain coverage stays current for the skill:
 - `use-modern-go`: design, errors, context, concurrency, testing, version-aware modern Go.
 - `use-modern-javascript-typescript`: strict mode, erasable TypeScript syntax, immutable operations, function-first design, optional chaining/nullish coalescing, common safety/performance pitfalls.
+- `use-nuqs`: typed parsers, React client-component boundaries, Next.js App Router server integration, coordinated query-state updates, navigation/history semantics, URL limits, and testing/debugging of nuqs-backed components.
 
 ## Editing Rules
 
