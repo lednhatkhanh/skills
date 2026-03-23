@@ -15,7 +15,7 @@ Use this workflow when the user asks to:
 
 This repository is for multiple personal skills, not only Go.
 
-- Each skill should live in its own top-level folder (examples: `use-modern-go/`, `use-modern-javascript-typescript/`).
+- Each skill should live in its own top-level folder (examples: `use-modern-go/`, `use-modern-javascript-typescript/`, `use-nuqs/`).
 - Each skill should keep concise top-level instructions in `SKILL.md`.
 - Detailed guidance should live in skill-local `references/` files when needed.
 - Metadata should live in skill-local `agents/` files when needed.

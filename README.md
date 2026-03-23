@@ -4,10 +4,10 @@ This repo is a workspace for your personal AI skills.
 
 ## What's Here
 
-- Skill folders at the repository root (current example: `use-modern-go/`)
+- Skill folders at the repository root (current examples: `use-modern-go/`, `use-modern-javascript-typescript/`, `use-nuqs/`)
 - Per-skill `SKILL.md` files for concise operational instructions
 - Optional per-skill `references/` and `agents/` folders for deeper guidance and metadata
-- `docs/` for shared or skill-specific prompt assets (current examples: `docs/go-skill-prompt.md`, `docs/javascript-typescript-skill-prompt.md`)
+- `docs/` for shared or skill-specific prompt assets (current examples: `docs/go-skill-prompt.md`, `docs/javascript-typescript-skill-prompt.md`, `docs/nuqs-skill-prompt.md`)
 
 ## Current Skills
 
@@ -15,6 +15,7 @@ This repo is a workspace for your personal AI skills.
 | --- | --- | --- |
 | `use-modern-go` | modern Go design, style, testing, concurrency, and version-aware guidance | `docs/go-skill-prompt.md` |
 | `use-modern-javascript-typescript` | strict, modern JS/TS guidance with function-first design, erasable TS syntax, immutable defaults, and pitfall prevention | `docs/javascript-typescript-skill-prompt.md` |
+| `use-nuqs` | type-safe URL query state for React + TypeScript, with Next.js 16+ App Router integration, parser discipline, navigation semantics, and testing/debugging guidance | `docs/nuqs-skill-prompt.md` |
 
 ## Quick Update Flow (Any Skill)
 
@@ -71,3 +72,4 @@ Naming convention:
 | --- | --- |
 | `use-modern-go` | `docs/go-skill-prompt.md` |
 | `use-modern-javascript-typescript` | `docs/javascript-typescript-skill-prompt.md` |
+| `use-nuqs` | `docs/nuqs-skill-prompt.md` |
