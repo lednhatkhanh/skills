@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Modern JavaScript + TypeScript"
   short_description: "Write strict, safe JS/TS with erasable and advanced types"
-  default_prompt: "Use $use-modern-javascript-typescript to apply strict, erasable JavaScript/TypeScript patterns with advanced generics, safe narrowing, and performance guardrails."
+  default_prompt: "Use $use-modern-javascript-typescript to apply Node.js 24+, TypeScript 5.9+, and evergreen-browser JavaScript/TypeScript patterns with advanced generics, safe narrowing, and performance guardrails."

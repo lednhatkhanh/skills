@@ -19,7 +19,7 @@ localStorage.setItem('debug', 'nuqs')
 ```
 
 - Reload after setting the flag.
-- Expect hook and internal logs to use the `nuqs` debug channel.
+- Expect logs prefixed with `[nuqs]` and `[nuq+]`, plus browser User Timing markers for URL updates and renders.
 
 Enable server or RSC logs in Node environments:
 
@@ -29,13 +29,16 @@ DEBUG=nuqs pnpm dev
 
 - Use this when debugging App Router server rendering, `nuqs/server`, or cache/loader issues.
 - Preserve relevant debug output when reporting or documenting a hard failure.
+- Do not document or chase unsupported legacy-browser behavior unless the task explicitly asks for it.
 
 ## 2) Component and Hook Testing
 
 - Use `withNuqsTestingAdapter` for React Testing Library hooks and components.
+- Use `NuqsTestingAdapter` directly when a wrapper component reads more clearly than a higher-order helper.
 - Seed tests with initial search params that match the scenario under test.
 - Assert both rendered UI behavior and URL update behavior.
 - Use `hasMemory: true` only when the test truly needs accumulated URL state across successive updates.
+- Keep rate limiting disabled in tests unless timing behavior itself is under test; opt in deliberately with adapter options.
 
 Prefer:
 
@@ -107,6 +110,10 @@ expect(isParserBijective(parseAsInteger, '42', 42)).toBe(true)
 - Symptom: structurally invalid or domain-invalid values leak into app logic.
 - Fix: add schema validation or explicit checks after parsing.
 
+7. Test runner/module setup hides nuqs imports.
+- Symptom: Jest or older test configuration fails to load the package cleanly.
+- Fix: remember that `nuqs` is ESM-only and configure the test runner accordingly before blaming the hooks.
+
 ## 5) Troubleshooting Checklist
 
 - Is debug logging enabled in the right environment?
@@ -115,4 +122,5 @@ expect(isParserBijective(parseAsInteger, '42', 42)).toBe(true)
 - Is Suspense applied at the server/client boundary?
 - Is one key mapped to exactly one parser contract?
 - Are tests asserting both UI state and URL state where relevant?
+- Are test-adapter options like `hasMemory`, `rateLimitFactor`, or queue-reset behavior set intentionally?
 - Are custom parsers covered with round-trip or bijection tests?

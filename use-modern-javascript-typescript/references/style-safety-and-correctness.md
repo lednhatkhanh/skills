@@ -20,6 +20,8 @@ Use this reference when implementing or reviewing code structure, typing strateg
 ## 1) Language Baseline
 
 - Prefer ESM modules.
+- Default to Node.js 24+, TypeScript 5.9+, and evergreen browsers Chrome 146+, Firefox 148+, and Safari 26+.
+- If React or Next.js are relevant, assume React 19+ and Next.js 16+ App Router only.
 - Keep JavaScript in strict mode semantics.
 - Keep TypeScript in strict mode and no-emit type-check by default.
 
@@ -40,8 +42,6 @@ Recommended `tsconfig` baseline:
   }
 }
 ```
-
-If `erasableSyntaxOnly` is unavailable in the installed TS version, enforce the same rule manually during review.
 
 ## 2) Function-First Design
 
@@ -195,6 +195,7 @@ const timeoutMs = config.request && config.request.timeoutMs || 5000;
 - Treat inputs as immutable unless explicitly documented otherwise.
 - Prefer non-mutating collection operations (`map`, `filter`, `reduce`, `toSorted`).
 - Avoid shared mutable module-level state unless unavoidable and synchronized.
+- Do not add polyfills or compatibility workarounds for unsupported legacy runtimes as part of normal guidance.
 
 ## 10) Async Control Flow
 
@@ -223,3 +224,4 @@ const invalidStatus: UserStatus = "archived";
 - Types: explicit at public boundaries; inference inside small local scopes.
 - Exports: avoid default exports in shared libraries unless project convention requires them.
 - Files: one cohesive responsibility per module.
+- Compatibility: no legacy-runtime branches unless explicitly required by the task.

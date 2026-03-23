@@ -30,6 +30,7 @@ Apply this order when making tradeoffs:
 5. Consistency
 
 Prefer boring, explicit code over clever code.
+Default to Go 1.26+ practices unless the module explicitly targets an older version.
 
 ## Formatting and File Hygiene
 
@@ -140,6 +141,7 @@ Prefer boring, explicit code over clever code.
 - Pin and review module updates with compatibility and security in mind.
 - Run `go mod tidy` when dependency or import surfaces change.
 - Design APIs and package boundaries for additive growth.
+- Do not add downgrade shims for pre-1.26 Go unless the repository explicitly requires them.
 
 ## Performance Posture
 

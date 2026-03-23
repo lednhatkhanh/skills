@@ -1,6 +1,6 @@
 ---
 name: use-nuqs
-description: Implement, review, and refactor type-safe URL query state with nuqs in React + TypeScript codebases. Use when adding or debugging query-string-backed UI state, parser definitions, shared search-param descriptors, App Router server/client integration, URL update behavior, or tests for components using useQueryState and useQueryStates. If Next.js is involved, assume Next.js 16+ and apply only to App Router patterns.
+description: Implement, review, and refactor type-safe URL query state with nuqs in React 19+ and TypeScript 5.9+ codebases. If Next.js is involved, assume Next.js 16+ App Router only, and target current evergreen browsers without legacy compatibility workarounds.
 ---
 
 # Use nuqs
@@ -9,20 +9,25 @@ Apply this skill to keep URL-backed state predictable, typed, shareable, and ali
 
 ## Quick Start
 
-1. Confirm the task is in a React + TypeScript codebase.
+1. Confirm the task is in a React 19+ and TypeScript 5.9+ codebase.
 2. If Next.js is involved, assume Next.js 16+, stay in App Router only, and keep `page.tsx`/`layout.tsx` server-first unless client behavior is required.
-3. Reuse existing parser descriptors or custom hooks before adding new query keys.
-4. Choose a typed parser and default value before wiring UI state.
-5. Use `useQueryStates` when related params must update atomically.
-6. Enable server re-renders only when the feature genuinely depends on server-side data or RSC updates.
-7. Load only the reference files needed for the task.
+3. Assume supported browsers are Chrome 146+, Firefox 148+, and Safari 26+.
+4. Reuse existing parser descriptors or custom hooks before adding new query keys.
+5. Choose a typed parser, URL encoding format, and default value before wiring UI state.
+6. Use `useQueryStates` when related params must update atomically.
+7. For controlled inputs, never pass `null` as `value`; use `withDefault('')` or `value={query ?? ''}` when binding nuqs state directly.
+8. Enable server re-renders only when the feature genuinely depends on server-side data or RSC updates.
+9. Load only the reference files needed for the task.
 
 ## Scope Guards
 
-- Support React only.
-- Support TypeScript only.
+- Support React 19+ only.
+- Support TypeScript 5.9+ only.
 - Support Next.js 16+ App Router only when Next.js is present.
+- Support evergreen browsers Chrome 146+, Firefox 148+, and Safari 26+ only.
 - Exclude Next.js Pages Router, Remix, React Router, TanStack Router, and JavaScript-only variants unless explicitly documenting them as out of scope.
+- Treat upstream references to Pages Router or non-Next adapters as inventory only, not implementation guidance for this skill.
+- Do not add legacy browser compatibility workarounds unless explicitly requested.
 
 ## Reference Routing
 
@@ -41,6 +46,7 @@ Apply this skill to keep URL-backed state predictable, typed, shareable, and ali
 2. Define the parser layer first.
 - Centralize key names, parsers, defaults, and shared options in a dedicated module.
 - Prefer built-in parsers over ad hoc string coercion.
+- Choose array and date encodings deliberately instead of letting each caller invent one.
 - Add schema validation after parsing when domain constraints matter.
 
 3. Wire client state deliberately.
@@ -54,12 +60,15 @@ Apply this skill to keep URL-backed state predictable, typed, shareable, and ali
 - Parse `searchParams` before reading cached values in server components.
 - Use `shallow: false` only when the URL update must trigger server work.
 - Pair server-triggered updates with Suspense and `startTransition` when loading state matters.
+- Do not assume `startTransition` implies `shallow: false`; configure both when server work is required.
 
 5. Optimize URL update behavior.
 - Use `history: 'replace'` for ephemeral filters and high-frequency edits.
 - Use `history: 'push'` for navigation-like state that should replay with back/forward.
 - Debounce search-like inputs and throttle rapid updates when browser limits or server churn matter.
+- Keep nuqs hooks in the smallest practical subtree and memoize expensive siblings that do not depend on query state.
 - Keep URLs short and stable with defaults, `urlKeys`, and serializer utilities when needed.
+- Do not add compatibility branches for unsupported legacy browsers or older React/Next.js releases.
 
 6. Validate the behavior end to end.
 

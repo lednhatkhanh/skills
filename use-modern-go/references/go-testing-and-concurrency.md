@@ -34,6 +34,7 @@ govulncheck ./...                    # security and dependency checks
 - Add integration tests at transport and storage boundaries.
 - Keep end-to-end tests for critical business flows.
 - Make failures actionable with inputs and expected/actual context.
+- Default to current Go 1.26+ testing capabilities unless the module explicitly targets an older version.
 
 ## Unit Test Structure
 

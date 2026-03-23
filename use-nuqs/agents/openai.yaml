@@ -1,4 +1,4 @@
 interface:
   display_name: "Use nuqs"
   short_description: "Type-safe React URL query state with nuqs"
-  default_prompt: "Use $use-nuqs to implement type-safe URL query state with React, TypeScript, and Next.js App Router guardrails."
+  default_prompt: "Use $use-nuqs to implement type-safe URL query state with React 19+, TypeScript 5.9+, and Next.js 16+ App Router guardrails."

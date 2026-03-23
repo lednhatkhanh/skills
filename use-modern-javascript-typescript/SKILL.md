@@ -1,6 +1,6 @@
 ---
 name: use-modern-javascript-typescript
-description: Design, write, review, and refactor modern JavaScript and TypeScript with TypeScript-first guidance for safety, correctness, performance, consistency, and advanced type modeling. Use when implementing or reviewing JS/TS services, libraries, CLIs, frontend code, async workflows, type models, and refactors that require strict mode, erasable TypeScript syntax, function-first design, modern language features, and practical advanced TypeScript patterns.
+description: Design, write, review, and refactor modern JavaScript and TypeScript with TypeScript-first guidance for safety, correctness, performance, consistency, and advanced type modeling. Default to TypeScript 5.9+, Node.js 24+, React 19+, Next.js 16+ App Router when relevant, and current evergreen browsers only.
 ---
 
 # Use Modern JavaScript + TypeScript
@@ -9,13 +9,14 @@ Apply this skill to produce predictable, type-safe, and maintainable JS/TS code 
 
 ## Quick Start
 
-1. Confirm runtime, module system, and TypeScript version before coding.
-2. Enable strictness (`strict` + `alwaysStrict`) and enforce erasable TS syntax.
-3. Prefer function declarations for named logic and composition over classes.
-4. Model types intentionally: use `type` for unions/transforms, `interface` for extendable object contracts.
-5. Use modern operators (`?.`, `??`), runtime-safe narrowing, and immutable patterns by default.
-6. Use advanced types only when they improve API clarity (`generics`, `infer`, mapped/conditional/template literal types).
-7. Load only the reference files needed for the task.
+1. Assume TypeScript 5.9+, Node.js 24+, ESM, and evergreen browsers Chrome 146+, Firefox 148+, and Safari 26+ unless the task explicitly says otherwise.
+2. If React or Next.js are present, assume React 19+ and Next.js 16+ App Router only.
+3. Enable strictness (`strict` + `alwaysStrict`) and enforce erasable TS syntax.
+4. Prefer function declarations for named logic and composition over classes.
+5. Model types intentionally: use `type` for unions/transforms, `interface` for extendable object contracts.
+6. Use modern operators (`?.`, `??`), runtime-safe narrowing, and immutable patterns by default.
+7. Use advanced types only when they improve API clarity (`generics`, `infer`, mapped/conditional/template literal types).
+8. Load only the reference files needed for the task.
 
 ## Reference Routing
 
@@ -27,7 +28,7 @@ Apply this skill to produce predictable, type-safe, and maintainable JS/TS code 
 ## Workflow
 
 1. Scope the change.
-- Identify runtime assumptions (`node`, browser, bundler, ESM/CJS) and compatibility constraints.
+- Identify whether the code is Node-only, browser-facing, or framework-bound, but keep the default runtime baseline modern (`node` 24+, evergreen browsers, ESM).
 - Identify API surface and behavior contracts before editing internals.
 
 2. Set language guardrails.
@@ -46,6 +47,7 @@ Apply this skill to produce predictable, type-safe, and maintainable JS/TS code 
 - Defer expensive work until needed.
 - Choose lazy or concurrent execution only when semantics remain correct.
 - Measure before and after when touching hot paths.
+- Do not add compatibility branches, polyfills, or legacy transpilation guidance for unsupported runtimes unless explicitly requested.
 
 5. Validate quality gates.
 
@@ -80,12 +82,13 @@ pnpm -s tsd                          # compile-time type contract tests (or equi
 - Do not leave discriminated unions non-exhaustive.
 - Keep advanced utility types bounded and readable; avoid recursive type explosions.
 - Do not silently swallow errors or rejected promises.
+- Do not add pre-Node 24 or legacy-browser compatibility fallbacks unless explicitly required.
 
 ## Output Expectations
 
 When applying this skill in a coding task:
 
-1. State the runtime + module assumptions.
+1. State the runtime + module assumptions, including whether the default Node 24+/evergreen browser baseline was used.
 2. Call out strictness and erasable-syntax decisions.
 3. Highlight correctness decisions around nullability, async flow, mutation, and type modeling.
 4. Mention performance decisions only when evidence or profiling supports them.

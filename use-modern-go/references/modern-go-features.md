@@ -5,6 +5,7 @@ Use this file to choose version-appropriate syntax and stdlib APIs.
 ## Rules
 
 - Detect and honor the module Go version before coding.
+- Default to Go 1.26+ unless the repository explicitly targets an older version.
 - Use features only up to and including the target version.
 - Prefer clearer standard library helpers over manual patterns.
 - If uncertain about feature availability, check the release notes for that version.
@@ -46,6 +47,27 @@ Use this file to choose version-appropriate syntax and stdlib APIs.
 ## Go 1.23+
 
 - Use iterator-capable collection helpers where they simplify code.
+
+## Go 1.24+
+
+- Use generic type aliases where they reduce duplication without obscuring the API surface.
+- Use the new `testing.B.Loop()` helper for cleaner benchmark loops when it improves readability.
+- Use `testing.T.Context()` / `testing.B.Context()` when test-scoped cancellation or deadlines should flow into helpers.
+- Use `os.Root` when code needs safer filesystem access constrained to a directory tree.
+
+## Go 1.25+
+
+- Use `testing/synctest` for deterministic testing of concurrent code when time and scheduling behavior need tighter control.
+- Assume container-aware `GOMAXPROCS` defaults on Linux instead of manually forcing CPU counts in typical containerized deployments.
+- Use the `go.mod` `ignore` directive when generated, vendored, or unrelated directories should stay out of `./...` package matching.
+- Treat `encoding/json/v2` and `encoding/json/jsontext` as experimental behind `GOEXPERIMENT=jsonv2`; do not adopt them as normal defaults unless the project explicitly opts in.
+
+## Go 1.26+
+
+- Use analyzer-backed `go fix` modernizers during upgrade and cleanup work before hand-applying broad mechanical rewrites.
+- Use `crypto/hpke` for HPKE support instead of third-party implementations when the project needs standards-based Hybrid Public Key Encryption.
+- Treat `simd/archsimd` as experimental and opt-in only; do not make it a default dependency path in general application code.
+- Assume the new garbage collector and other toolchain/runtime improvements are the default baseline behavior; do not add tuning advice that exists only to preserve older pre-1.26 behavior unless measurement justifies it.
 
 ## For Newer Versions
 

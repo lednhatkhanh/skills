@@ -94,3 +94,4 @@ Use this reference during implementation and review to prevent common JS/TS bugs
 - Are runtime boundaries validated before type narrowing?
 - Are advanced utility types bounded, readable, and compile-time tested?
 - Are hot-path optimizations measured and documented?
+- Did the change avoid introducing unnecessary legacy-runtime or legacy-browser compatibility code?

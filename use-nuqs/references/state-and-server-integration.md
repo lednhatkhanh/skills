@@ -19,6 +19,8 @@ Use this reference when wiring client query state, coordinating related params, 
 - Clear the key with `null`.
 - Use functional updates when the next value depends on the previous one.
 - Treat the query string as the source of truth; avoid duplicating derived local state unless there is a strong reason.
+- Bind controlled inputs directly to nuqs state when possible; local hook state updates immediately even if URL flushing is queued, throttled, or debounced.
+- If the parser is nullable, never pass that value straight into an input element; use `value={state ?? ''}` or switch to `withDefault('')`.
 
 Prefer:
 
@@ -46,6 +48,7 @@ export function Pager() {
 - Prefer one atomic update over several separate hook updates for related params.
 - Use partial object updates for subsets and `null` to clear the whole managed group.
 - Use `urlKeys` when the URL should stay short but the code should remain descriptive.
+- Keep shared behavior in parser-level `withOptions(...)` or hook-level defaults, and use call-level options only for one-off overrides.
 
 Prefer:
 
@@ -81,12 +84,15 @@ export function SearchControls() {
 - Remember that hooks bound to the same query key stay synchronized across components.
 - Do not configure different parsers for the same key in different places.
 - If consumers need different derived views of the same state, derive them from one canonical parser instead of redefining the key.
+- Avoid mirroring the same query key into local `useState`; if you need a transient draft, keep it at the input edge and document why it cannot use nuqs state directly.
 
 ## 4) Setter Semantics
 
 - Nuqs state updates return a Promise that resolves to the flushed `URLSearchParams`.
 - Use that Promise only when code truly needs the committed URL, such as analytics, sharing, or follow-up logic.
 - Assume UI state updates immediately, while URL flushing may be queued or rate-limited.
+- In `useQueryStates`, option precedence is: call-level options, then parser-level options, then hook-level defaults.
+- Multiple setters called in the same event loop tick may share the same pending Promise and flush as a single URL update.
 
 ## 5) App Router Server Loaders
 
@@ -171,6 +177,7 @@ function Results() {
 - Wrap client components that use nuqs in `<Suspense>` when rendering them from a server page boundary.
 - Keep the outer shell server-rendered when possible; move the client component down the tree.
 - Use `startTransition` with server-triggering updates when the feature needs pending/loading state visibility.
+- `startTransition` does not trigger server re-renders by itself; keep `shallow: false` explicit when the update must notify the server.
 - Use `shallow: false` only for intentional server re-renders or refetching.
 
 ## 8) Integration Review Checklist
@@ -178,6 +185,7 @@ function Results() {
 - Is single-key vs multi-key state chosen intentionally?
 - Are related params updated atomically when required?
 - Are duplicate local derivations avoided?
+- Are controlled inputs relying on nuqs state intentionally, without unnecessary mirror state?
 - Are loader/cache imports coming from `nuqs/server`?
 - Is `parse` called before `get`/`all` on caches?
 - Is async `searchParams` handled correctly for Next.js 16+ App Router?

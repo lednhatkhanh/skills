@@ -90,3 +90,4 @@ Ordered and dependent side effects should stay sequential.
 - Capture benchmark input distributions close to production behavior.
 - Document tradeoffs when introducing caches, throttling, debouncing, or batching.
 - Document tradeoffs when introducing advanced type-level utilities that increase type-check cost.
+- Do not spend effort on legacy-engine workarounds for runtimes or browsers outside the supported baseline unless explicitly requested.

@@ -30,4 +30,5 @@ This skill is grounded in the following sources and synthesized into actionable 
 - Treat this file as provenance and scope.
 - Use `go-style-and-design.md` for architecture and API guidance.
 - Use `go-testing-and-concurrency.md` for reliability and concurrency guidance.
-- Use `modern-go-features.md` for version-gated syntax and stdlib choices.
+- Use `modern-go-features.md` for version-gated syntax and stdlib choices across Go releases.
+- Default the rest of the skill to Go 1.26+ unless the repository explicitly targets an older version.

@@ -9,7 +9,7 @@ Core sources:
 - https://github.com/wshobson/agents/blob/main/plugins/javascript-typescript/skills/typescript-advanced-types/SKILL.md
 - https://www.typescriptlang.org/tsconfig/strict.html
 - https://www.typescriptlang.org/tsconfig/erasableSyntaxOnly.html
-- https://nodejs.org/docs/latest/api/typescript.html
+- https://nodejs.org/api/typescript.html
 
 Additional recommended sources:
 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode
@@ -35,7 +35,7 @@ Core:
 - https://github.com/wshobson/agents/blob/main/plugins/javascript-typescript/skills/typescript-advanced-types/SKILL.md
 - https://www.typescriptlang.org/tsconfig/strict.html
 - https://www.typescriptlang.org/tsconfig/erasableSyntaxOnly.html
-- https://nodejs.org/docs/latest/api/typescript.html
+- https://nodejs.org/api/typescript.html
 
 Additional:
 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode
@@ -56,28 +56,31 @@ Write or update a JavaScript/TypeScript skill that enforces modern, strict, safe
 
 Requirements:
 1. Target both JavaScript and TypeScript, with TypeScript-first guidance.
-2. Keep guidance practical, enforceable, and reviewable.
-3. Prefer function declarations over function expressions for named logic.
-4. Prefer functions and composition over classes by default.
-5. Enforce strictness:
+2. Default the skill to TypeScript 5.9+, Node.js 24+, and evergreen browsers Chrome 146+, Firefox 148+, and Safari 26+.
+3. When React or Next.js are relevant, assume React 19+ and Next.js 16+ App Router only.
+4. Keep guidance practical, enforceable, and reviewable.
+5. Prefer ESM and modern platform capabilities; do not add legacy browser/runtime compatibility branches, polyfill advice, or CommonJS-first guidance unless explicitly requested.
+6. Prefer function declarations over function expressions for named logic.
+7. Prefer functions and composition over classes by default.
+8. Enforce strictness:
    - JavaScript strict mode semantics
    - TypeScript `strict: true` and `alwaysStrict: true`
-6. Enforce erasable TypeScript syntax only:
+9. Enforce erasable TypeScript syntax only:
    - disallow runtime TS constructs that require emit transforms (for example `enum`, runtime `namespace`, parameter properties, `import =`, `export =`, angle-bracket assertions)
-7. Use deliberate type modeling rules:
+10. Use deliberate type modeling rules:
    - prefer `type` for unions, transformations, and composition
    - use `interface` for extendable object contracts and declaration-merging cases
-8. Include advanced TypeScript patterns with practical constraints:
+11. Include advanced TypeScript patterns with practical constraints:
    - constrained/defaulted generics
    - conditional types, mapped types, template literal types, and `infer`
    - explicit guidance on when advanced type-level abstraction is justified
-9. Require runtime-safe narrowing at boundaries:
+12. Require runtime-safe narrowing at boundaries:
    - prefer type guards and assertion functions over broad `as` casting
-10. Default to optional chaining (`?.`) and nullish coalescing (`??`) where appropriate.
-11. Enforce immutable operations by default and allow mutation only when explicitly required and documented.
-12. Include lazy evaluation and deferred work patterns where they improve performance and do not harm clarity.
-13. Address common correctness and performance pitfalls with explicit anti-pattern -> replacement guidance.
-14. Include type-level performance guardrails to prevent compile-time slowdowns from overly complex recursive types.
+13. Default to optional chaining (`?.`) and nullish coalescing (`??`) where appropriate.
+14. Enforce immutable operations by default and allow mutation only when explicitly required and documented.
+15. Include lazy evaluation and deferred work patterns where they improve performance and do not harm clarity.
+16. Address common correctness and performance pitfalls with explicit anti-pattern -> replacement guidance.
+17. Include type-level performance guardrails to prevent compile-time slowdowns from overly complex recursive types.
 
 Non-negotiable rules to encode:
 - Do not use `any` unless unavoidable and explicitly justified.
@@ -89,6 +92,7 @@ Non-negotiable rules to encode:
 - Do not introduce classes unless composition-based functions are insufficient.
 - Do not use unchecked type assertions where runtime validation or narrowing is required.
 - Do not leave discriminated unions non-exhaustive.
+- Do not add compatibility fallbacks for pre-Node 24 runtimes or unsupported browsers unless explicitly requested.
 
 Validation checklist to include in the skill:
 - Type checking and strict config validation
@@ -102,5 +106,5 @@ Output format:
 1. Updated SKILL.md text.
 2. Updated references sections (or file-level diffs) for style/safety, performance/lazy evaluation, pitfalls, and source-basis.
 3. Short rationale of major changes.
-4. Explicit assumptions (runtime, module system, TypeScript target, compatibility constraints).
+4. Explicit assumptions (Node.js 24+, TypeScript 5.9+, supported browsers, ESM baseline, and React/Next.js assumptions when relevant).
 ```
