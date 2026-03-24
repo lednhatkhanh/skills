@@ -32,17 +32,25 @@ Use this reference during implementation and review to prevent common JS/TS bugs
 
 ## Type and Nullability Pitfalls
 
-1. Pitfall: using `||` for defaults on nullable fields.
+1. Pitfall: using `==` or `!=`.
+- Risk: coercion-based comparisons hide bugs and make intent less precise.
+- Fix: use `===` and `!==`.
+
+2. Pitfall: using `||` for defaults on nullable fields.
 - Risk: valid falsy values (`0`, `false`, `""`) are overwritten.
 - Fix: use `??`.
 
-2. Pitfall: aggressive type assertions (`as SomeType`) instead of narrowing.
+3. Pitfall: aggressive type assertions (`as SomeType`) instead of narrowing.
 - Risk: compile-time silence with runtime failure.
 - Fix: use type guards, schema validation, and `unknown` boundaries.
 
-3. Pitfall: broad `any`.
+4. Pitfall: broad `any`.
 - Risk: type safety collapse and hidden defects.
 - Fix: prefer `unknown`, narrow early, and model domain types explicitly.
+
+5. Pitfall: one-sided nullish checks.
+- Risk: inconsistent narrowing style and weaker runtime intent.
+- Fix: use `typeof value === "..."` when code depends on a specific runtime type, handle both `undefined` and `null` for explicit nullish presence/absence, and reserve `!!value` for genuine truthiness checks.
 
 ## Advanced Type-System Pitfalls
 
@@ -89,7 +97,9 @@ Use this reference during implementation and review to prevent common JS/TS bugs
 ## Review Checklist
 
 - Are all async flows awaited, returned, or captured?
+- Are equality checks using `===` and `!==` rather than `==` or `!=`?
 - Are defaults using `??` rather than `||` when falsy values are valid?
+- Are runtime checks using `typeof` for concrete type checks, explicit two-branch nullish checks when needed, and `!!value` only for genuine truthiness?
 - Are shared inputs protected from mutation?
 - Are runtime boundaries validated before type narrowing?
 - Are advanced utility types bounded, readable, and compile-time tested?

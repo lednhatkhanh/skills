@@ -34,10 +34,11 @@ Apply this skill to produce predictable, type-safe, and maintainable JS/TS code 
 2. Set language guardrails.
 - Enforce strict mode semantics.
 - Enforce erasable TS syntax only.
+- Enforce strict equality (`===`, `!==`) and avoid loose equality (`==`, `!=`).
 - Enforce function-first design and type consistency.
 
 3. Implement for correctness first.
-- Write explicit nullability handling.
+- Write explicit runtime-type and nullish handling; do not use one-sided `null`/`undefined` checks when the intent is "present" or "absent".
 - Use constrained/defaulted generics and discriminated unions for domain modeling where appropriate.
 - Prefer type guards/assertion functions over broad assertions at runtime boundaries.
 - Keep data immutable unless mutation is required and localized.
@@ -76,6 +77,8 @@ pnpm -s tsd                          # compile-time type contract tests (or equi
 - Use `unknown` instead of `any` unless unavoidable and justified.
 - Use constrained/defaulted generics for reusable APIs; avoid unconstrained type parameters.
 - Use type guards/assertion functions instead of unchecked broad assertions.
+- Use `===` and `!==`; do not use `==` or `!=`.
+- Use `typeof value === "..."` for concrete runtime type checks; when checking nullish presence/absence, handle both `undefined` and `null`; use `!!value` only when truthiness is the intended condition.
 - Use `?.` and `??` over fragile chained guards and `||` defaults.
 - Avoid mutating shared arrays/objects; prefer non-mutating alternatives.
 - Do not use `forEach` for async control flow.

@@ -76,16 +76,20 @@ Requirements:
    - explicit guidance on when advanced type-level abstraction is justified
 12. Require runtime-safe narrowing at boundaries:
    - prefer type guards and assertion functions over broad `as` casting
+   - do not use one-sided nullish guards; for concrete runtime type checks use `typeof value === "..."`, for explicit nullish checks handle both branches (`typeof value === "undefined" || value === null` or the inverse), and use `!!value` only when truthiness is the actual condition
 13. Default to optional chaining (`?.`) and nullish coalescing (`??`) where appropriate.
-14. Enforce immutable operations by default and allow mutation only when explicitly required and documented.
-15. Include lazy evaluation and deferred work patterns where they improve performance and do not harm clarity.
-16. Address common correctness and performance pitfalls with explicit anti-pattern -> replacement guidance.
-17. Include type-level performance guardrails to prevent compile-time slowdowns from overly complex recursive types.
+14. Prefer strict equality:
+   - use `===` and `!==` instead of `==` and `!=`
+15. Enforce immutable operations by default and allow mutation only when explicitly required and documented.
+16. Include lazy evaluation and deferred work patterns where they improve performance and do not harm clarity.
+17. Address common correctness and performance pitfalls with explicit anti-pattern -> replacement guidance.
+18. Include type-level performance guardrails to prevent compile-time slowdowns from overly complex recursive types.
 
 Non-negotiable rules to encode:
 - Do not use `any` unless unavoidable and explicitly justified.
 - Do not ship advanced utility types without compile-time usage tests for expected and invalid cases.
-- Do not rely on implicit truthy/falsy checks for nullable data where precision matters.
+- Do not use one-sided nullish checks; use `typeof`-based narrowing for runtime type checks, handle both `undefined` and `null` when checking nullish presence/absence, and use `!!value` only when truthiness is the intended condition.
+- Do not use `==` or `!=`; prefer `===` and `!==`.
 - Enforce immutable operations by default; do not mutate inputs or shared state unless explicitly required and documented.
 - Do not use `Array.prototype.forEach` for async control flow.
 - Do not use `Array.prototype.sort` on shared arrays when mutation is unsafe.

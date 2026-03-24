@@ -24,6 +24,7 @@ Use this reference when implementing or reviewing code structure, typing strateg
 - If React or Next.js are relevant, assume React 19+ and Next.js 16+ App Router only.
 - Keep JavaScript in strict mode semantics.
 - Keep TypeScript in strict mode and no-emit type-check by default.
+- Prefer strict equality (`===`, `!==`) over loose equality (`==`, `!=`).
 
 Recommended `tsconfig` baseline:
 
@@ -125,14 +126,16 @@ export type PrefixedKeys<
 - Narrow `unknown` at runtime boundaries.
 - Prefer type guards and assertion functions over broad assertions.
 - Keep assertions small and close to parsing/IO boundaries.
+- Do not use one-sided nullish guards. Use `typeof value === "..."` when the runtime type matters, handle both `undefined` and `null` when checking explicit nullish presence/absence, and use `!!value` only when truthiness is the actual condition.
 
 Prefer:
 
 ```ts
 export function isUser(value: unknown): value is User {
   return (
-    typeof value === "object" &&
+    typeof value !== "undefined" &&
     value !== null &&
+    typeof value === "object" &&
     "id" in value &&
     "email" in value
   );
@@ -165,9 +168,15 @@ Prefer erasable alternatives:
 
 ## 7) Nullability and Defaults
 
+- Use `===` and `!==` for equality checks; do not use `==` or `!=`.
+- Do not use one-sided nullish checks when the intent is "present" or "absent".
+- Use `typeof value === "..."` when code depends on a specific runtime type.
+- When checking explicit nullish absence, use `typeof value === "undefined" || value === null`.
+- When checking explicit nullish presence, use `typeof value !== "undefined" && value !== null`.
+- Use `!!value` only when checking truthiness is sufficient and `0`, `false`, and `""` are not meaningful values.
 - Use optional chaining for deep access.
 - Use nullish coalescing for defaults where `0`, `false`, and `""` are valid values.
-- Avoid truthy/falsy defaults for nullable fields.
+- Avoid `||` defaults for nullable fields.
 
 Prefer:
 
@@ -175,10 +184,34 @@ Prefer:
 const timeoutMs = config.request?.timeoutMs ?? 5_000;
 ```
 
+Prefer:
+
+```ts
+if (typeof input === "string") {
+  return input.trim();
+}
+
+if (typeof cacheEntry === "undefined" || cacheEntry === null) {
+  return loadFreshValue();
+}
+
+if (!!isReady) {
+  startWork();
+}
+```
+
 Avoid:
 
 ```ts
 const timeoutMs = config.request && config.request.timeoutMs || 5000;
+```
+
+Avoid:
+
+```ts
+if (status == "ready") {
+  startWork();
+}
 ```
 
 ## 8) Errors and Result Semantics
