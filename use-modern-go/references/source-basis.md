@@ -1,6 +1,6 @@
 # Source Basis
 
-This skill is grounded in the following sources and synthesized into actionable rules.
+Last reviewed: 2026-04-05
 
 ## Core Sources
 
@@ -9,26 +9,23 @@ This skill is grounded in the following sources and synthesized into actionable 
 - Google Go Decisions: https://google.github.io/styleguide/go/decisions
 - Google Go Best Practices: https://google.github.io/styleguide/go/best-practices
 - Go FAQ: https://go.dev/doc/faq
-- JetBrains modern guidelines `use-modern-go` skill:
-  https://github.com/JetBrains/go-modern-guidelines/blob/main/claude/modern-go-guidelines/skills/use-modern-go/SKILL.md
+- JetBrains modern guidelines: https://github.com/JetBrains/go-modern-guidelines/blob/main/claude/modern-go-guidelines/skills/use-modern-go/SKILL.md
 
 ## Additional Sources
 
-- Go Code Review Comments: https://go.dev/wiki/CodeReviewComments
-- Go Language Specification: https://go.dev/ref/spec
-- Go Memory Model: https://go.dev/ref/mem
-- Go Modules Reference: https://go.dev/ref/mod
-- Data Race Detector: https://go.dev/doc/articles/race_detector
-- Go Fuzzing: https://go.dev/doc/security/fuzz/
-- Go Vulnerability Management: https://go.dev/doc/security/vuln/
-- `testing` package docs: https://pkg.go.dev/testing
-- `context` package docs: https://pkg.go.dev/context
-- Go Release History and Notes: https://go.dev/doc/devel/release
+- Code Review Comments: https://go.dev/wiki/CodeReviewComments
+- Language Specification: https://go.dev/ref/spec
+- Memory Model: https://go.dev/ref/mem
+- Modules Reference: https://go.dev/ref/mod
+- Race Detector: https://go.dev/doc/articles/race_detector
+- Fuzzing: https://go.dev/doc/security/fuzz/
+- Vulnerability Management: https://go.dev/doc/security/vuln/
+- `testing`: https://pkg.go.dev/testing
+- `context`: https://pkg.go.dev/context
+- Release History: https://go.dev/doc/devel/release
 
-## How to Use This File
+## Notes
 
-- Treat this file as provenance and scope.
-- Use `go-style-and-design.md` for architecture and API guidance.
-- Use `go-testing-and-concurrency.md` for reliability and concurrency guidance.
-- Use `modern-go-features.md` for version-gated syntax and stdlib choices across Go releases.
-- Default the rest of the skill to Go 1.26+ unless the repository explicitly targets an older version.
+- Default Go 1.26+ baseline. Pre-1.26 compatibility excluded unless module explicitly targets older.
+- `modern-go-features.md` maintains version-complete history for older targets.
+- Upstream JetBrains skill used as rule inventory; official Go docs used to constrain and verify.

@@ -50,22 +50,22 @@ Additional:
 - https://go.dev/doc/devel/release
 
 Task:
-Write or update a Go skill that enforces best practices for maintainable, scalable, testable, readable, and modern Go code.
+Write or update a Go skill that enforces best practices for maintainable, scalable, testable, readable, and modern Go code. The skill targets AI coding agents — keep it concise, directive, and enforceable. Optimize for minimal context window usage.
 
 Requirements:
-1. Keep guidance practical, enforceable, and reviewable (avoid vague advice).
+1. Keep guidance practical, enforceable, and reviewable. Directive rules, not explanatory prose.
 2. Default the skill to Go 1.26+ guidance unless a module explicitly targets an older Go version.
-3. Cover package design, API boundaries, naming, error semantics, context usage, concurrency safety, testing strategy, and module/version management.
-4. Keep `references/modern-go-features.md` as a version-complete history of best practices by Go version, including older releases.
-5. In `SKILL.md` and non-version-history references, avoid legacy compatibility shims or downgrade guidance for pre-1.26 Go unless an older target version is explicitly relevant.
-6. Include version-aware guidance for modern Go features and stdlib APIs; avoid suggesting features newer than the module's target Go version.
-7. Prefer modern stdlib choices and current toolchain behavior for Go 1.26+ by default.
+3. Never add compatibility shims, fallback branches, or downgrade workarounds for pre-1.26 Go unless the module explicitly targets an older version. Always use modern Go features and stdlib.
+4. Cover package design, API boundaries, naming, error semantics, context usage, concurrency safety, testing strategy, and module/version management.
+5. Keep `references/modern-go-features.md` as a version-complete history by Go version.
+6. In `SKILL.md` and non-version-history references, avoid legacy guidance.
+7. Prefer modern stdlib choices and current toolchain behavior for Go 1.26+.
 8. Include clear workflow steps, non-negotiable rules, quality gates, and output expectations.
 9. Structure for progressive disclosure: concise SKILL.md + focused references.
-10. Include security and reliability practices: race detection, fuzzing, vuln scanning, and safe defaults.
-11. Include observability and operability guidance: structured logging, cancellation/timeout boundaries, and failure transparency.
-12. Avoid speculative future-version claims; verify version-specific statements against official release notes.
-13. Prefer minimal, targeted edits when updating an existing skill.
+10. Include security and reliability: race detection, fuzzing, vuln scanning, safe defaults.
+11. Include observability: structured logging, cancellation/timeout boundaries, failure transparency.
+12. Eliminate cross-file repetition. SKILL.md is the single source for rules and validation gates. References add depth (patterns, examples, conventions) without restating SKILL.md rules.
+13. No TOC sections, review checklists, or reliability checklists in references — these duplicate SKILL.md.
 
 Non-negotiable rules to encode:
 - Prefer simple, explicit control flow over clever abstractions.
@@ -73,8 +73,8 @@ Non-negotiable rules to encode:
 - Return rich wrapped errors; never silently swallow errors.
 - Never store context.Context in structs; pass it explicitly.
 - Do not spawn goroutines without ownership, cancellation, and shutdown strategy.
-- Do not add pre-1.26 compatibility branches or downgrade workarounds unless an older module target is explicit.
-- Keep APIs backward-compatible unless a breaking change is explicitly intended and documented.
+- Do not add pre-1.26 compatibility branches or downgrade workarounds.
+- Keep APIs backward-compatible unless a breaking change is explicitly intended.
 - Avoid global mutable state unless strictly justified.
 
 Optimization guidance to encode:
@@ -96,8 +96,7 @@ Validation checklist to include in the skill:
 
 Output format:
 1. Updated SKILL.md text.
-2. Updated reference file sections (or file-level diffs) for style/design, testing/concurrency, modern features, and source-basis.
-3. Short rationale of major changes (what changed and why).
-4. Explicit assumptions (default Go 1.26+ baseline, any older module target if explicitly relevant, and project type if inferred).
-5. Note any commands that are optional based on tool availability (for example, govulncheck).
+2. Updated reference file sections for style/design, testing/concurrency, modern features, and source-basis.
+3. Short rationale of major changes.
+4. Explicit assumptions (default Go 1.26+ baseline, any older module target if relevant).
 ```

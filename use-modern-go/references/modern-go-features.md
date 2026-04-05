@@ -1,81 +1,84 @@
 # Modern Go Features by Version
 
-Use this file to choose version-appropriate syntax and stdlib APIs.
+Use to choose version-appropriate syntax and stdlib APIs. Default Go 1.26+; constrain only when module target requires.
 
 ## Rules
 
-- Detect and honor the module Go version before coding.
-- Default to Go 1.26+ unless the repository explicitly targets an older version.
-- Use features only up to and including the target version.
-- Prefer clearer standard library helpers over manual patterns.
-- If uncertain about feature availability, check the release notes for that version.
+- Detect module Go version before coding.
+- Use features only up to the target version.
+- Prefer stdlib helpers over manual patterns.
 
-## Go 1.13+
+## Feature Matrix
 
-- Use `errors.Is` and `errors.As` for wrapped error matching.
+### Go 1.13+
+- `errors.Is`, `errors.As` for wrapped error matching.
 
-## Go 1.18+
+### Go 1.18+
+- `any` instead of `interface{}`.
+- Generics where they reduce duplication without obscuring intent.
+- `strings.Cut`, `bytes.Cut` for delimiter splitting.
 
-- Use `any` instead of `interface{}` where appropriate.
-- Use generics where they reduce duplication without obscuring intent.
-- Use `strings.Cut` and `bytes.Cut` for delimiter splitting.
+### Go 1.19+
+- Typed atomics: `atomic.Bool`, `atomic.Int64`, `atomic.Pointer[T]`.
 
-## Go 1.19+
+### Go 1.20+
+- `errors.Join` for combining independent errors.
+- `context.WithCancelCause`, `context.Cause` for cause propagation.
+- `strings.CutPrefix`, `strings.CutSuffix`, `strings.Clone`, `bytes.Clone`.
 
-- Use typed atomics (`atomic.Bool`, `atomic.Int64`, `atomic.Pointer[T]`) when atomic coordination is required.
+### Go 1.21+
+- `min`, `max`, `clear` built-ins.
+- `slices` and `maps` packages.
+- `sync.OnceFunc`, `sync.OnceValue`.
+- `log/slog` for structured logging.
 
-## Go 1.20+
+### Go 1.22+
+- `for i := range n` integer range loops.
+- Fixed loop variable capture in closures.
+- Enhanced `net/http` `ServeMux` patterns, `r.PathValue`.
 
-- Use `errors.Join` for combining independent errors.
-- Use `context.WithCancelCause` and `context.Cause` when cause propagation is relevant.
-- Use `strings.CutPrefix` and `strings.CutSuffix` for explicit prefix/suffix parsing.
-- Use `strings.Clone` and `bytes.Clone` when ownership isolation is needed.
+### Go 1.23+
+- Iterator-capable collection helpers.
 
-## Go 1.21+
+### Go 1.24+
+- Generic type aliases.
+- `testing.B.Loop()` for cleaner benchmark loops. `testing.T.Context()` / `testing.B.Context()` for test-scoped cancellation.
+- `os.Root` for directory-constrained filesystem access.
+- `strings.SplitSeq`, `strings.FieldsSeq`, `bytes.SplitSeq`, `bytes.FieldsSeq` for iterator-based splitting.
+- `encoding/json` `omitzero` struct tag — omits zero values (complements `omitempty`).
+- `runtime.AddCleanup` — preferred over `runtime.SetFinalizer`.
+- Experimental `testing/synctest` for deterministic concurrent testing.
 
-- Use `min`, `max`, and `clear` built-ins when they improve clarity.
-- Use `slices` and `maps` helper packages for common collection operations.
-- Use `sync.OnceFunc` and `sync.OnceValue` for one-time initialization helpers.
-- Use `log/slog` for structured logging where it fits the project conventions.
+### Go 1.25+
+- **`sync.WaitGroup.Go(fn)`** — replaces `wg.Add(1)` + `go func() { defer wg.Done(); fn() }()`. Prefer for all new goroutine-per-task patterns.
+- `testing/synctest` graduated from experimental — use for deterministic time/scheduling tests.
+- Container-aware `GOMAXPROCS` defaults on Linux (reads cgroup CPU limits).
+- `runtime/trace.FlightRecorder` for lightweight always-on trace capture.
+- `T.Attr`, `B.Attr`, `F.Attr` for structured test attributes.
+- `T.Output`, `B.Output`, `F.Output` as `io.Writer` for test output.
+- `net/http.CrossOriginProtection` for Fetch-metadata CSRF protection.
+- `go.mod` `ignore` directive for excluding directories from `./...` matching.
+- `encoding/json/v2` experimental behind `GOEXPERIMENT=jsonv2` — do not adopt as default.
 
-## Go 1.22+
+### Go 1.26+
+- **`new(expression)`** — `new()` accepts expressions, not just types. `new(30)` returns `*int`, `new(true)` returns `*bool`, `new(T{})` returns `*T`. Prefer for pointer-to-value construction.
+- **`errors.AsType[T](err)`** — generic type-safe replacement for `errors.As`. Returns `(T, bool)` without needing a target variable.
+- Self-referential generic type constraints now allowed.
+- Analyzer-backed `go fix` modernizers — prefer over hand-applied mechanical rewrites.
+- Green Tea GC enabled by default (10-40% GC overhead reduction). No tuning for pre-1.26 GC behavior.
+- `crypto/hpke` for standards-based Hybrid Public Key Encryption (RFC 9180).
+- `log/slog.NewMultiHandler` for fan-out to multiple log handlers.
+- `testing.ArtifactDir` for test output files.
+- `io.ReadAll` ~2x faster with ~50% less memory.
+- `simd/archsimd` experimental, opt-in only.
+- `runtime/secret` experimental for secure erasure of secret data.
 
-- Use `for i := range n` when integer range loops improve readability.
-- Rely on fixed loop variable capture behavior in closures.
-- Use enhanced `net/http` `ServeMux` patterns and `r.PathValue` when available.
+## Newer Versions
 
-## Go 1.23+
+- Check `https://go.dev/doc/devel/release` for each target.
+- Add APIs only when confirmed in the module target version.
 
-- Use iterator-capable collection helpers where they simplify code.
-
-## Go 1.24+
-
-- Use generic type aliases where they reduce duplication without obscuring the API surface.
-- Use the new `testing.B.Loop()` helper for cleaner benchmark loops when it improves readability.
-- Use `testing.T.Context()` / `testing.B.Context()` when test-scoped cancellation or deadlines should flow into helpers.
-- Use `os.Root` when code needs safer filesystem access constrained to a directory tree.
-
-## Go 1.25+
-
-- Use `testing/synctest` for deterministic testing of concurrent code when time and scheduling behavior need tighter control.
-- Assume container-aware `GOMAXPROCS` defaults on Linux instead of manually forcing CPU counts in typical containerized deployments.
-- Use the `go.mod` `ignore` directive when generated, vendored, or unrelated directories should stay out of `./...` package matching.
-- Treat `encoding/json/v2` and `encoding/json/jsontext` as experimental behind `GOEXPERIMENT=jsonv2`; do not adopt them as normal defaults unless the project explicitly opts in.
-
-## Go 1.26+
-
-- Use analyzer-backed `go fix` modernizers during upgrade and cleanup work before hand-applying broad mechanical rewrites.
-- Use `crypto/hpke` for HPKE support instead of third-party implementations when the project needs standards-based Hybrid Public Key Encryption.
-- Treat `simd/archsimd` as experimental and opt-in only; do not make it a default dependency path in general application code.
-- Assume the new garbage collector and other toolchain/runtime improvements are the default baseline behavior; do not add tuning advice that exists only to preserve older pre-1.26 behavior unless measurement justifies it.
-
-## For Newer Versions
-
-- Review `https://go.dev/doc/devel/release` for each target version.
-- Add newer APIs only when confirmed available in the module target version.
-
-## Fallback Guidance
+## Fallback
 
 - If a helper is unavailable, use the clearest compatible idiom.
 - Prefer portability and readability over aggressive feature usage.
-- Mention version constraints only when the choice is non-obvious.

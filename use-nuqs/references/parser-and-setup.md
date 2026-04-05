@@ -1,36 +1,8 @@
 # Parser and Setup
 
-Use this reference when introducing nuqs, defining query contracts, or reviewing parser correctness.
+Adapter configuration, parser selection, and shared descriptor patterns. Rules from SKILL.md are not repeated here.
 
-## Table of Contents
-
-- 1) Scope Baseline
-- 2) Adapter and Component Boundaries
-- 3) Shared Parser Modules
-- 4) Parser Selection Rules
-- 5) Defaults and Nullability
-- 6) Custom Parsers
-- 7) Setup Review Checklist
-
-## 1) Scope Baseline
-
-- Stay in React 19+ only.
-- Stay in TypeScript 5.9+ only.
-- If Next.js is present, assume Next.js 16+ and use App Router only.
-- Assume evergreen browsers Chrome 146+, Firefox 148+, and Safari 26+.
-- Treat Next.js Pages Router guidance as out of scope for this skill.
-
-## 2) Adapter and Component Boundaries
-
-- Use `useQueryState` and `useQueryStates` only in client components with `'use client'`.
-- Keep `page.tsx` and `layout.tsx` server-first when possible; move nuqs hooks into client children.
-- In Next.js App Router, wrap the application tree with `NuqsAdapter` from `nuqs/adapters/next/app`.
-- Import parser utilities needed by server code from `nuqs/server` to avoid pulling client-only boundaries into server modules.
-- If many hooks share identical defaults, prefer adapter-level defaults only when that policy is truly app-wide.
-- Treat Next.js Pages Router and non-Next adapter imports as out of scope for this skill even though the upstream community guide lists them.
-- Do not add legacy browser or pre-React-19 compatibility workarounds to setup guidance.
-
-Prefer:
+## Adapter
 
 ```tsx
 // app/layout.tsx
@@ -48,14 +20,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-## 3) Shared Parser Modules
+- Keep `page.tsx`/`layout.tsx` server-first; move nuqs hooks into client children.
+- Import server-side parsers from `nuqs/server`.
+- Global defaults via adapter (v2.5.0+):
 
-- Define parsers once in a dedicated module such as `search-params.ts`.
-- Reuse the same descriptor object in client hooks, loaders, and caches.
-- Abstract repeated key/parser pairs into a custom hook when multiple components need the same contract.
-- Keep semantic variable names in code even if the URL uses shorter aliases.
+```tsx
+<NuqsAdapter defaultOptions={{ shallow: false, scroll: true, clearOnDefault: false, limitUrlUpdates: throttle(250) }}>
+```
 
-Prefer:
+## Shared Parser Modules
+
+Define parsers once, reuse across client hooks, loaders, and caches:
 
 ```ts
 import { parseAsInteger, parseAsString } from 'nuqs/server'
@@ -66,75 +41,44 @@ export const searchParsers = {
 }
 ```
 
-## 4) Parser Selection Rules
+Abstract repeated key/parser pairs into custom hooks when multiple components share the same contract.
 
-- Use raw string state only for true free-form string parameters.
-- Use typed parsers for non-string values:
-  - `parseAsInteger` for whole numbers
-  - `parseAsFloat` for decimals
-  - `parseAsBoolean` for booleans
-  - `parseAsIsoDate`, `parseAsIsoDateTime`, or `parseAsTimestamp` for `Date` values, based on the wire format you need
-  - enum/literal parsers for constrained states
-  - `parseAsArrayOf(...)` for separator-based arrays and `parseAsNativeArrayOf(...)` for repeated-key arrays
-  - `parseAsJson(...)` only when the state genuinely belongs in the URL and a Standard Schema or synchronous validator defines the shape
-- Use `parseAsIndex` when the UI presents 1-based numbering but internal logic should stay 0-based.
-- Use `parseAsHex` for hexadecimal color-like values instead of hand-rolled parsing.
-- Keep one serialization format per key. Do not let different callers invent different array or object encodings.
-- Treat raw `parseAsString` as a noop parser; if only a constrained subset is valid, switch to literal/enum parsing.
+## Parser Selection
 
-Prefer:
+| Data type | Parser |
+|---|---|
+| Free-form string | `parseAsString` (noop — switch to literal/enum if constrained) |
+| Integer | `parseAsInteger` |
+| Decimal | `parseAsFloat` |
+| Boolean | `parseAsBoolean` |
+| Hex integer | `parseAsHex` |
+| 1-based index | `parseAsIndex` (0-based internally, +1 in URL) |
+| Date | `parseAsIsoDate`, `parseAsIsoDateTime`, `parseAsTimestamp` |
+| String literal union | `parseAsStringLiteral(values)` |
+| Number literal union | `parseAsNumberLiteral(values)` |
+| String enum | `parseAsStringEnum(enum)` (uses `Object.values`) |
+| Separator array | `parseAsArrayOf(parser, separator?)` (default comma) |
+| Repeated-key array | `parseAsNativeArrayOf(parser)` (`?tag=a&tag=b` format) |
+| JSON blob | `parseAsJson(schema)` — Standard Schema (Zod/ArkType/Valibot) or custom validator |
 
-```ts
-import { parseAsInteger, parseAsStringLiteral } from 'nuqs'
+One serialization format per key. Never let different callers invent different encodings.
 
-const statusValues = ['open', 'closed'] as const
+## Defaults and Nullability
 
-const filterParsers = {
-  page: parseAsInteger.withDefault(1),
-  status: parseAsStringLiteral(statusValues).withDefault('open')
-}
-```
+- `withDefault(value)` for non-nullable state.
+- Clear with `null` — removes key, falls back to default.
+- `clearOnDefault: false` only when default must be visible in URL.
+- `withOptions(...)` close to shared parser declarations for inherited behavior.
 
-Avoid:
-
-```ts
-const [page] = useQueryState('page')
-const pageNumber = Number(page ?? '1')
-```
-
-## 5) Defaults and Nullability
-
-- Use `withDefault` when consumers should receive a non-nullable state value.
-- Remember that default values stay internal unless the feature intentionally writes them to the URL.
-- Clear a value with `null`; this removes the key from the URL and falls back to the default value if one exists.
-- Use `clearOnDefault: false` only when the feature explicitly needs default values visible in the URL.
-- Keep parser-level `withOptions(...)` close to shared parser declarations when behavior must be inherited consistently.
-
-## 6) Custom Parsers
-
-- Use `createParser` for domain-specific types.
-- Keep `parse`, `serialize`, and `eq` pure.
-- Return `null` for invalid inputs.
-- Add an `eq` function whenever primitive equality is insufficient, such as for `Date` or object values.
-- Validate business invariants after parsing with a schema validator or explicit checks.
-- Remember that custom parsers should still be bijective when the feature depends on round-tripping values through the URL.
-
-Prefer:
+## Custom Parsers
 
 ```ts
 import { createParser } from 'nuqs'
 
-type DateRange = {
-  start: string
-  end: string
-}
-
 export const parseAsDateRange = createParser<DateRange>({
   parse(value) {
     const [start, end] = value.split('..')
-    if (!start || !end) {
-      return null
-    }
+    if (!start || !end) return null
     return { start, end }
   },
   serialize(value) {
@@ -146,13 +90,7 @@ export const parseAsDateRange = createParser<DateRange>({
 })
 ```
 
-## 7) Setup Review Checklist
-
-- Is the codebase React 19+ and TypeScript 5.9+?
-- If Next.js is present, is the implementation Next.js 16+ App Router only?
-- Is `NuqsAdapter` mounted at the appropriate root?
-- Are server-side imports coming from `nuqs/server`?
-- Is every non-string query key using a typed parser?
-- Is the array/date/JSON wire format chosen explicitly and reused everywhere?
-- Is each key/parser pair centralized and reused?
-- Are defaults intentional and null-clearing semantics understood?
+- `parse`, `serialize`, `eq` must be pure. Return `null` for invalid inputs.
+- `eq` required for non-primitive values.
+- Validate business invariants after parsing, not inside the parser.
+- Bijective when round-tripping matters.

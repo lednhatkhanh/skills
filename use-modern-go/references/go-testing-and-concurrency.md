@@ -1,115 +1,72 @@
-# Go Testing and Concurrency Reference
+# Go Testing and Concurrency
 
-## Table of Contents
-
-1. [Validation Matrix](#validation-matrix)
-2. [Testing Strategy](#testing-strategy)
-3. [Unit Test Structure](#unit-test-structure)
-4. [Table-Driven Tests and Subtests](#table-driven-tests-and-subtests)
-5. [Assertions and Comparisons](#assertions-and-comparisons)
-6. [Integration and End-to-End Tests](#integration-and-end-to-end-tests)
-7. [Fuzzing and Property Coverage](#fuzzing-and-property-coverage)
-8. [Benchmarking and Profiling](#benchmarking-and-profiling)
-9. [Concurrency Ownership Rules](#concurrency-ownership-rules)
-10. [Context, Cancellation, and Timeouts](#context-cancellation-and-timeouts)
-11. [Resource Cleanup and Leak Prevention](#resource-cleanup-and-leak-prevention)
-12. [Reliability Checklist](#reliability-checklist)
-
-## Validation Matrix
-
-Use the smallest set that proves correctness for the change:
-
-```bash
-go test ./...
-go vet ./...
-go test -race ./...                  # concurrency touched
-go test -fuzz=Fuzz -run=^$ ./...     # parser/decoder/input-heavy changes
-go test -bench . ./...               # performance-sensitive changes
-govulncheck ./...                    # security and dependency checks
-```
+Testing strategy, concurrency safety, and reliability patterns. Rules and validation gates from SKILL.md are not repeated here.
 
 ## Testing Strategy
 
-- Prefer fast deterministic unit tests.
-- Add integration tests at transport and storage boundaries.
-- Keep end-to-end tests for critical business flows.
-- Make failures actionable with inputs and expected/actual context.
-- Default to current Go 1.26+ testing capabilities unless the module explicitly targets an older version.
+- Fast deterministic unit tests. Integration tests at transport/storage boundaries. E2E for critical business flows.
+- Actionable failures with inputs and expected/actual context.
 
-## Unit Test Structure
+## Unit Tests
 
-- Name tests by behavior (`TestParseRejectsInvalidHeader`).
-- Follow arrange-act-assert flow.
-- Use `t.Helper()` in shared helpers.
-- Keep one failure reason per assertion block when practical.
-- Avoid shared mutable globals across tests.
+- Name by behavior: `TestParseRejectsInvalidHeader`.
+- Arrange-act-assert. `t.Helper()` in shared helpers.
+- Use `t.Context()` for test-scoped cancellation (Go 1.24+).
+- Use `testing/synctest` for deterministic concurrent tests (Go 1.25+).
+- One failure reason per assertion block. No shared mutable globals.
 
-## Table-Driven Tests and Subtests
+## Table-Driven Tests
 
-- Use table-driven tests for repeated logic patterns.
-- Use stable concise subtest names.
+- Table-driven for repeated logic patterns. Stable concise subtest names.
 - Capture loop variables correctly in closures/goroutines.
-- Include key values in failure messages, not only subtest names.
+- Include key values in failure messages.
 
-## Assertions and Comparisons
+## Assertions
 
-- Use plain Go comparisons for simple checks.
-- Use structural diffs (`cmp.Diff` or equivalent) for complex values.
-- Compare errors with `errors.Is`/`errors.As`.
-- Avoid brittle string matching on wrapped errors unless required.
+- Plain Go comparisons for simple checks.
+- `cmp.Diff` for complex values.
+- `errors.Is`/`errors.As` for errors. Avoid brittle string matching.
 
-## Integration and End-to-End Tests
+## Integration Tests
 
-- Prefer real transports with test servers when feasible.
-- Verify serialization, retries, deadlines, and idempotency boundaries.
-- Keep test fixtures isolated and reproducible.
-- Use `testdata/` for stable fixture files.
+- Real transports with test servers when feasible.
+- Verify serialization, retries, deadlines, idempotency.
+- Isolated reproducible fixtures. `testdata/` for stable files.
 
-## Fuzzing and Property Coverage
+## Fuzzing
 
-- Use fuzzing for parser-like code and untrusted input boundaries.
+- Fuzz parser-like code and untrusted input boundaries.
 - Seed corpus with known edge and regression cases.
-- Promote crashing/failing inputs into deterministic regression tests.
-- Define invariants explicitly for property-style expectations.
+- Promote crashes into deterministic regression tests.
 
-## Benchmarking and Profiling
+## Benchmarking
 
-- Benchmark only hot paths and allocation-sensitive code.
-- Use `b.ReportAllocs()` when allocation behavior matters.
-- Prevent dead-code elimination by consuming outputs.
-- Profile before major performance refactors.
-- Compare benchmark baselines before accepting optimization complexity.
+- Only hot paths and allocation-sensitive code.
+- Use `b.Loop()` for benchmark loops (Go 1.24+) — cleaner than manual `for i := 0; i < b.N; i++`.
+- `b.ReportAllocs()` when allocation behavior matters.
+- Consume outputs to prevent dead-code elimination.
+- Compare baselines before accepting optimization complexity.
 
-## Concurrency Ownership Rules
+## Concurrency
 
-- Make goroutine owner and shutdown condition explicit.
-- Use bounded worker pools/backpressure for untrusted or bursty workloads.
-- Prefer `errgroup`/`WaitGroup` patterns to avoid orphan goroutines.
-- Guard shared mutable state with mutexes/atomics and document invariants.
-- Avoid copying structs that contain mutexes.
-- Avoid fire-and-forget goroutines in library code.
+- Goroutine owner and shutdown condition explicit.
+- **`wg.Go(fn)`** for goroutine-per-task (Go 1.25+) — replaces `wg.Add(1)` + `go func() { defer wg.Done(); ... }()`.
+- Bounded worker pools/backpressure for bursty workloads.
+- `errgroup`/`WaitGroup` to avoid orphan goroutines.
+- Guard shared state with mutexes/atomics; document invariants.
+- No copying structs with mutexes. No fire-and-forget goroutines in library code.
 
-## Context, Cancellation, and Timeouts
+## Context and Cancellation
 
-- Thread context through concurrent work and I/O boundaries.
-- Respect context cancellation in loops and blocking operations.
-- Ensure child goroutines stop when parent context is done.
-- Make timeout intent explicit in both code and tests.
-- Use cause-aware cancellation APIs when supported and useful.
+- Thread context through concurrent work and I/O.
+- Respect cancellation in loops and blocking operations.
+- Child goroutines stop when parent context is done.
+- Explicit timeout intent in code and tests.
+- Cause-aware cancellation APIs when supported and useful.
 
-## Resource Cleanup and Leak Prevention
+## Resource Cleanup
 
-- Close resources with `defer` near acquisition.
-- Use `t.Cleanup` for test resource lifecycle.
-- Document caller cleanup responsibilities in public APIs.
-- Avoid `os.Exit` in code under test.
-- Stop tickers/timers when lifecycle requires explicit cleanup.
-
-## Reliability Checklist
-
-- Do tests fail deterministically with useful diagnostics?
-- Do race checks pass when concurrency is involved?
-- Are goroutine lifecycles explicit and bounded?
-- Are timeout/cancellation behaviors covered in tests?
-- Are security-sensitive input paths fuzzed where relevant?
-- Are vulnerability checks run for changed dependencies/surfaces?
+- `defer` close near acquisition.
+- `t.Cleanup` for test resource lifecycle.
+- Document caller cleanup responsibilities.
+- No `os.Exit` in code under test. Stop tickers/timers explicitly.

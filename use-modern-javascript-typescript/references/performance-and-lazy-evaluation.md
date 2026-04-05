@@ -1,93 +1,73 @@
 # Performance and Lazy Evaluation
 
-Use this reference when performance is relevant or when choosing between eager and deferred execution.
+Optimization, lazy execution, concurrency, and compiler performance. Rules from SKILL.md are not repeated here.
 
-## 1) Optimization Order
+## Optimization Order
 
-1. Preserve correctness.
-2. Measure baseline behavior.
-3. Optimize bottlenecks only.
-4. Re-measure and keep only improvements.
+1. Preserve correctness. 2. Measure baseline. 3. Optimize bottlenecks only. 4. Re-measure. No complexity without evidence.
 
-Do not introduce complexity without evidence.
+## Compiler Performance
 
-## 2) Type-System Performance
+- `tsc --extendedDiagnostics` for type-heavy changes.
+- `interface` over `&` intersections for object shapes — interfaces cache; intersections re-evaluate.
+- Explicit return types on exported functions reduce inference work.
+- Named type aliases over deeply nested inline conditionals.
+- Bounded recursive types. `[T] extends [U]` to control distribution.
+- `skipLibCheck: true`, `isolatedDeclarations: true`.
+- Avoid barrel files in large projects.
 
-Treat compiler throughput as part of performance for TS-heavy codebases.
+## Lazy Patterns
 
-- Run diagnostics (`tsc --extendedDiagnostics`) when type-heavy changes significantly affect check time.
-- Prefer reusable helper aliases over deeply nested inline conditional types.
-- Keep recursive type utilities bounded; do not model unbounded recursion in public types.
-- Control unwanted distributive behavior with tuple wrapping (`[T] extends [U]`) when needed.
-- Split complex utility types into small named parts to improve maintainability and error readability.
-
-## 3) Lazy Evaluation Patterns
-
-### Generator Pipelines
-
-Use generators to avoid allocating full intermediate arrays when only partial consumption is needed.
+### Iterator Helpers (preferred)
 
 ```ts
-export function* mapLazy<T, R>(
-  source: Iterable<T>,
-  project: (item: T) => R,
-): Generator<R> {
-  for (const item of source) {
-    yield project(item);
-  }
+const top = products.values()
+  .filter((p) => p.price > 100)
+  .map((p) => p.name)
+  .take(5)
+  .toArray();
+```
+
+Prefer over generators for standard transform/filter/take. Use generators only for custom yield logic.
+
+### Generators
+
+```ts
+function* mapLazy<T, R>(source: Iterable<T>, fn: (item: T) => R): Generator<R> {
+  for (const item of source) yield fn(item);
 }
 ```
 
-### Deferred Computation with `??=`
+### Deferred Computation
 
 ```ts
-type Cache = {
-  parsedConfig?: ParsedConfig;
-};
-
-export function getParsedConfig(cache: Cache, raw: string): ParsedConfig {
-  cache.parsedConfig ??= parseConfig(raw);
-  return cache.parsedConfig;
-}
+cache.parsedConfig ??= parseConfig(raw);                              // ??= lazy init
+const { buildReport } = await import("./reporting/build-report.js");  // dynamic import
+const { promise, resolve, reject } = Promise.withResolvers<T>();      // deferred promise
 ```
 
-### Lazy Dynamic Imports
+## Concurrency
 
-Load optional or rare code paths only when needed.
+| Pattern | When |
+|---------|------|
+| `Promise.all` | Independent tasks, fail-fast |
+| `Promise.allSettled` | Best-effort, partial success OK |
+| Bounded concurrency | Large batches, avoid resource spikes |
+| Sequential `for...of` + `await` | Ordered dependent side effects |
 
-```ts
-export async function runHeavyReport(input: ReportInput): Promise<Report> {
-  const { buildReport } = await import("./reporting/build-report.js");
-  return buildReport(input);
-}
-```
+## Memory
 
-## 4) Concurrency Choices
+- Iterator helpers / streaming for large datasets — no intermediate arrays.
+- `structuredClone()` for deep copies. Avoid repeated spreading in loops.
+- `toSorted()`/`toReversed()`/`toSpliced()`/`.with()` — immutable, allocation-efficient.
+- Reuse stable `RegExp` / parser instances.
+- `using` / `await using` for deterministic cleanup.
 
-- Use `Promise.all` for independent tasks where one failure should fail the group.
-- Use `Promise.allSettled` for best-effort fan-out.
-- Use bounded concurrency for large batches to avoid resource spikes.
-
-Ordered and dependent side effects should stay sequential.
-
-## 5) Memory and Allocation Hygiene
-
-- Prefer streaming/iterables for large datasets.
-- Avoid repeated object spreading in deep loops when it causes excessive allocations.
-- Reuse stable instances for expensive regex/parsers where safe.
-- Use `toSorted` / `toReversed` when mutation would cause defensive cloning later anyway.
-
-## 6) Common High-Value Improvements
+## Quick Wins
 
 - Exit early on invalid inputs.
-- Hoist invariant work outside loops.
+- Hoist invariants outside loops.
+- `Map`/`Set` indexing over O(n²) scans.
+- `Set` composition over manual iteration.
+- `Object.groupBy()` over manual reduce.
 - Cache normalized keys for repeated lookups.
-- Replace O(n^2) scans with `Map`/`Set` indexing where appropriate.
-
-## 7) Performance Guardrails
-
-- Keep readable code unless measured impact requires lower-level optimization.
-- Capture benchmark input distributions close to production behavior.
-- Document tradeoffs when introducing caches, throttling, debouncing, or batching.
-- Document tradeoffs when introducing advanced type-level utilities that increase type-check cost.
-- Do not spend effort on legacy-engine workarounds for runtimes or browsers outside the supported baseline unless explicitly requested.

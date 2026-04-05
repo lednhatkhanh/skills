@@ -5,89 +5,77 @@ description: Design, write, review, and refactor maintainable, scalable, testabl
 
 # Use Modern Go
 
-Apply this skill to produce idiomatic Go code that is easy to evolve, safe under load, and operationally predictable.
+Produce idiomatic Go code that is easy to evolve, safe under load, and operationally predictable. Never add compatibility shims for older Go versions unless the module explicitly targets one.
 
-## Quick Start
+## Baseline
 
-1. Assume Go 1.26+ unless the repository explicitly declares an older module target.
-
-```bash
-go list -m -f '{{.GoVersion}}' 2>/dev/null || awk '/^go /{print $2; exit}' go.mod
-```
-
-2. Use Go 1.26+ language and stdlib features by default; only constrain lower when the module target explicitly requires it.
-3. Protect API compatibility unless a breaking change is explicitly requested.
-4. Prioritize, in order: clarity, simplicity, concision, maintainability, consistency.
-5. Load only the reference files needed for the task.
+- Go 1.26+ unless the repository explicitly declares an older module target.
+- Detect version: `go list -m -f '{{.GoVersion}}' 2>/dev/null || awk '/^go /{print $2; exit}' go.mod`
+- Priorities in order: clarity, simplicity, concision, maintainability, consistency.
 
 ## Reference Routing
 
-- Load [references/go-style-and-design.md](references/go-style-and-design.md) for package/API design, naming, docs, errors, context, dependency policy, observability, and compatibility.
-- Load [references/go-testing-and-concurrency.md](references/go-testing-and-concurrency.md) for tests, fuzzing, race safety, goroutine lifecycle, cancellation, and reliability checks.
-- Load [references/modern-go-features.md](references/modern-go-features.md) when the task is version-specific or when an older module target is explicitly relevant.
-- Load [references/source-basis.md](references/source-basis.md) for canonical source provenance.
+Load only what the task needs:
+
+- [references/go-style-and-design.md](references/go-style-and-design.md) — naming, package/API design, errors, context, observability, security, data semantics, dependencies.
+- [references/go-testing-and-concurrency.md](references/go-testing-and-concurrency.md) — tests, fuzzing, benchmarks, race safety, goroutine lifecycle, cancellation, cleanup.
+- [references/modern-go-features.md](references/modern-go-features.md) — version-gated features from Go 1.13 through 1.26+.
+- [references/source-basis.md](references/source-basis.md) — canonical source provenance.
 
 ## Workflow
 
-1. Scope the change.
-- Identify ownership boundaries, exported API impact, and compatibility risks first.
-- Confirm whether the module is on the default Go 1.26+ baseline or explicitly pinned older before design choices.
-
-2. Choose design direction.
-- Keep packages cohesive and small.
-- Define interfaces where consumed, not where produced.
-- Keep zero values useful when practical.
-- Accept `context.Context` as first parameter for request-scoped work.
-
-3. Implement with predictable behavior.
-- Return errors for expected failures; avoid panic in normal paths.
-- Wrap errors with `%w` and actionable context.
-- Keep goroutine lifetime explicit, bounded, and cancelable.
-- Avoid hidden global mutable state.
-- Keep logging structured and boundary-oriented; avoid duplicate log-and-return chains.
-
-4. Optimize only with evidence.
-- Measure before optimization.
-- Use benchmarks/profiles for hot paths.
-- Justify any `sync/atomic` or `sync.Pool` usage with measurable impact.
-
-5. Validate with quality gates.
+1. **Scope** — Identify ownership boundaries, exported API impact, compatibility risks. Confirm Go version baseline.
+2. **Design** — Cohesive small packages. Interfaces at consumers. Zero values useful. `context.Context` as first param for request-scoped work.
+3. **Implement** — Return errors with `%w` and context. Explicit goroutine lifetime, bounded and cancelable. Structured logging at boundaries. No hidden global mutable state.
+4. **Optimize** — Measure first. Benchmarks/profiles for hot paths. Justify `sync/atomic` or `sync.Pool` with data.
+5. **Validate**:
 
 ```bash
-go mod tidy                          # when dependencies/imports changed
+go mod tidy                          # when deps/imports changed
 gofmt -w ./...
 go test ./...
 go vet ./...
 ```
 
-Run additional checks when relevant:
+When relevant:
 
 ```bash
 go test -race ./...                  # concurrency changes
-go test -run TestName ./...          # focused debugging
 go test -fuzz=Fuzz -run=^$ ./...     # parser/decoder/input-heavy code
 go test -bench . ./...               # performance-sensitive paths
-govulncheck ./...                    # reachable vulnerability checks (if installed)
+govulncheck ./...                    # reachable vuln checks (if installed)
 ```
 
 ## Non-Negotiable Rules
 
-- Do not use features newer than the target Go version.
-- Do not add pre-1.26 compatibility branches or downgrade workarounds unless the module explicitly targets an older Go version.
-- Do not introduce `util`, `common`, `helpers`, or catch-all packages.
-- Do not hide core control flow in clever abstractions.
-- Do not swallow errors; return rich actionable context.
-- Do not store `context.Context` in structs.
-- Do not start goroutines without ownership, cancellation, and shutdown paths.
-- Do not break exported API contracts unless explicitly requested and documented.
-- Do not add dependencies without clear benefit and maintenance cost awareness.
+### Never
 
-## Output Expectations
+- Features newer than the target Go version
+- Pre-1.26 compatibility branches unless module explicitly targets older
+- `util`, `common`, `helpers`, or catch-all packages
+- Clever abstractions hiding core control flow
+- Swallowed errors — return rich actionable context with `%w`
+- `context.Context` stored in structs
+- Goroutines without ownership, cancellation, and shutdown paths
+- Breaking exported API contracts unless explicitly requested and documented
+- Dependencies without clear benefit and maintenance cost awareness
 
-When applying this skill in a coding task:
+### Always
+
+- Simple explicit control flow
+- Interfaces defined at consumption boundaries, not preemptively
+- Error handling with `errors.Is`/`errors.As` (`errors.AsType[T]` on 1.26+), wrapped with `%w`
+- `sync.WaitGroup.Go(fn)` for goroutine-per-task patterns (Go 1.25+)
+- Context propagated through call chains and goroutines
+- Structured logs at I/O boundaries with stable identifiers
+- Validate external input at boundaries; fail closed
+- Document cleanup responsibilities (`Close`, `Stop`, `Cancel`)
+- Protect API compatibility; favor additive evolution
+
+## Output
 
 1. Explain key design decisions and tradeoffs.
-2. Call out version-gated decisions only when the module target is not the default Go 1.26+ baseline.
+2. Call out version-gated decisions only when module target differs from Go 1.26+ default.
 3. Include tests for behavior, edge cases, and failure paths.
-4. Mention what was validated (`test`, `vet`, `race`, `fuzz`, `bench`, `govulncheck` as applicable).
-5. State assumptions (default Go 1.26+ baseline or explicit older module target, plus integration boundaries).
+4. State what was validated (`test`, `vet`, `race`, `fuzz`, `bench`, `govulncheck`).
+5. State assumptions (Go version baseline, integration boundaries).

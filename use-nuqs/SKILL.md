@@ -5,107 +5,68 @@ description: Implement, review, and refactor type-safe URL query state with nuqs
 
 # Use nuqs
 
-Apply this skill to keep URL-backed state predictable, typed, shareable, and aligned between React clients and Next.js App Router server code.
+Keep URL-backed state predictable, typed, shareable, and aligned between React clients and Next.js App Router server code. Never add legacy browser or older framework compatibility workarounds.
 
-## Quick Start
+## Baseline
 
-1. Confirm the task is in a React 19+ and TypeScript 5.9+ codebase.
-2. If Next.js is involved, assume Next.js 16+, stay in App Router only, and keep `page.tsx`/`layout.tsx` server-first unless client behavior is required.
-3. Assume supported browsers are Chrome 146+, Firefox 148+, and Safari 26+.
-4. Reuse existing parser descriptors or custom hooks before adding new query keys.
-5. Choose a typed parser, URL encoding format, and default value before wiring UI state.
-6. Use `useQueryStates` when related params must update atomically.
-7. For controlled inputs, never pass `null` as `value`; use `withDefault('')` or `value={query ?? ''}` when binding nuqs state directly.
-8. Enable server re-renders only when the feature genuinely depends on server-side data or RSC updates.
-9. Load only the reference files needed for the task.
-
-## Scope Guards
-
-- Support React 19+ only.
-- Support TypeScript 5.9+ only.
-- Support Next.js 16+ App Router only when Next.js is present.
-- Support evergreen browsers Chrome 146+, Firefox 148+, and Safari 26+ only.
-- Exclude Next.js Pages Router, Remix, React Router, TanStack Router, and JavaScript-only variants unless explicitly documenting them as out of scope.
-- Treat upstream references to Pages Router or non-Next adapters as inventory only, not implementation guidance for this skill.
-- Do not add legacy browser compatibility workarounds unless explicitly requested.
+- React 19+, TypeScript 5.9+, evergreen browsers Chrome 146+/Firefox 148+/Safari 26+.
+- Next.js 16+ App Router only when Next.js is present.
+- No Pages Router, no Remix/React Router/TanStack Router, no legacy browser shims.
 
 ## Reference Routing
 
-- Load [references/parser-and-setup.md](references/parser-and-setup.md) for adapter setup, parser selection, defaults, shared descriptors, and custom parser rules.
-- Load [references/state-and-server-integration.md](references/state-and-server-integration.md) for `useQueryState`, `useQueryStates`, loaders, caches, Suspense, and App Router server integration.
-- Load [references/performance-navigation-and-limits.md](references/performance-navigation-and-limits.md) for history behavior, rate limiting, URL hygiene, shorter keys, and browser limits.
-- Load [references/debugging-testing-and-troubleshooting.md](references/debugging-testing-and-troubleshooting.md) for debug logs, testing adapters, parser tests, and common failure modes.
-- Load [references/source-basis.md](references/source-basis.md) for canonical source provenance.
+Load only what the task needs:
+
+- [references/parser-and-setup.md](references/parser-and-setup.md) — adapter setup, parser selection, defaults, shared descriptors, custom parsers.
+- [references/state-and-server-integration.md](references/state-and-server-integration.md) — `useQueryState`, `useQueryStates`, loaders, caches, Suspense, App Router server integration.
+- [references/performance-navigation-and-limits.md](references/performance-navigation-and-limits.md) — history behavior, rate limiting, URL hygiene, browser limits.
+- [references/debugging-testing-and-troubleshooting.md](references/debugging-testing-and-troubleshooting.md) — debug logs, testing adapters, parser tests, failure modes.
+- [references/source-basis.md](references/source-basis.md) — canonical source provenance.
 
 ## Workflow
 
-1. Scope the query-state contract.
-- Identify which state belongs in the URL because it must survive refresh, deep links, shareable URLs, or browser navigation.
-- Keep secrets, oversized payloads, and purely ephemeral state out of the URL.
-
-2. Define the parser layer first.
-- Centralize key names, parsers, defaults, and shared options in a dedicated module.
-- Prefer built-in parsers over ad hoc string coercion.
-- Choose array and date encodings deliberately instead of letting each caller invent one.
-- Add schema validation after parsing when domain constraints matter.
-
-3. Wire client state deliberately.
-- Use `useQueryState` for a single key.
-- Use `useQueryStates` for coordinated params, partial updates, or atomic commits.
-- Clear keys with `null`.
-- Use functional updates when deriving from previous state.
-
-4. Integrate App Router server behavior only when needed.
-- Import loaders, caches, and shared parsers from `nuqs/server`.
-- Parse `searchParams` before reading cached values in server components.
-- Use `shallow: false` only when the URL update must trigger server work.
-- Pair server-triggered updates with Suspense and `startTransition` when loading state matters.
-- Do not assume `startTransition` implies `shallow: false`; configure both when server work is required.
-
-5. Optimize URL update behavior.
-- Use `history: 'replace'` for ephemeral filters and high-frequency edits.
-- Use `history: 'push'` for navigation-like state that should replay with back/forward.
-- Debounce search-like inputs and throttle rapid updates when browser limits or server churn matter.
-- Keep nuqs hooks in the smallest practical subtree and memoize expensive siblings that do not depend on query state.
-- Keep URLs short and stable with defaults, `urlKeys`, and serializer utilities when needed.
-- Do not add compatibility branches for unsupported legacy browsers or older React/Next.js releases.
-
-6. Validate the behavior end to end.
+1. **Scope** — Identify what belongs in the URL (survives refresh, deep links, shareable). Secrets, bulk data, ephemeral state stay out.
+2. **Parsers** — Centralize key names, parsers, defaults in a shared module. Typed parsers over string coercion. Validate business rules after parsing.
+3. **Wire client** — `useQueryState` for single key, `useQueryStates` for atomic multi-key. Clear with `null`. Functional updates from previous state.
+4. **Server integration** — Loaders/caches from `nuqs/server`. Await async `searchParams`. `shallow: false` only for intentional server re-renders. Pair with Suspense and `startTransition` when needed.
+5. **Optimize** — `history: 'replace'` for ephemeral state, `'push'` for navigable state. Debounce search inputs, throttle rapid updates. `urlKeys` for shorter URLs. Hooks in smallest subtree.
+6. **Validate**:
 
 ```bash
-# run project-specific equivalents as available
 pnpm -s tsc --noEmit
 pnpm -s lint
 pnpm -s test
 ```
 
-Run additional checks when relevant:
-
-```bash
-pnpm -s test -- --runInBand        # isolate flaky URL/state tests
-pnpm -s test searchParams          # focused component or hook tests
-pnpm -s test:e2e                   # back/forward, refresh, and deep-link verification
-```
+When relevant: `--runInBand` (isolate URL tests), `test searchParams` (focused), `test:e2e` (navigation).
 
 ## Non-Negotiable Rules
 
-- Use `useQueryState` and `useQueryStates` only in React client components.
-- Wrap the app with `NuqsAdapter` when using Next.js App Router.
-- Import server-safe parsers, loaders, and caches from `nuqs/server`.
-- Do not use different parsers for the same query key across components.
-- Do not keep non-string query data as raw strings when a typed parser exists.
-- Do not assume nuqs parsers validate business rules or object shape.
-- Do not default to `shallow: false`; use it only for intentional server re-renders.
-- Do not put sensitive, bulky, or non-shareable state in the URL.
-- Do not skip `eq` on custom non-primitive parsers.
-- Prefer shared parser descriptors or custom hooks over repeating inline parser setup.
+### Never
 
-## Output Expectations
+- `useQueryState`/`useQueryStates` outside client components
+- Different parsers for the same query key across components
+- Raw string state for non-string data when a typed parser exists
+- `shallow: false` as default — only for intentional server re-renders
+- `null` as controlled input `value` — use `withDefault('')` or `value ?? ''`
+- Sensitive, bulky, or non-shareable state in the URL
+- Assume parsers validate business rules or object shape
+- Skip `eq` on custom non-primitive parsers
+- Legacy browser or pre-React 19/pre-Next 16 compatibility workarounds
 
-When applying this skill in a coding task:
+### Always
 
-1. State the parser and key contract being introduced or reused.
-2. Call out whether the change is client-only or App Router client/server coordinated.
-3. Mention history, shallow/server-render, and rate-limiting decisions when they affect behavior.
-4. Include tests or manual verification notes for refresh, deep-link, and back/forward behavior.
-5. State assumptions about React, TypeScript, and whether Next.js App Router is present.
+- Wrap app with `NuqsAdapter` for Next.js App Router
+- Import server-safe parsers, loaders, caches from `nuqs/server`
+- Shared parser descriptors or custom hooks over repeated inline setup
+- `useQueryStates` for related params that must update atomically
+- Schema validation after parsing when domain constraints matter
+- `startTransition` does NOT imply `shallow: false` — configure both when server work needed
+
+## Output
+
+1. State parser and key contract being introduced or reused.
+2. Call out client-only vs App Router client/server coordinated.
+3. Mention history, shallow/server-render, rate-limiting decisions.
+4. Include tests or verification notes for refresh, deep-link, back/forward.
+5. State React/TypeScript/Next.js assumptions.
